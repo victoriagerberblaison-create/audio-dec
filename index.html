@@ -363,8 +363,7 @@ async function loadCatalog() {
   const { data, error } = await sb.from(TRACKS_TABLE)
     .select('id, titre, podcast, domaine, hashtags, fichier, description, ordre, created_at')
     .eq('publie', true)
-    .order('ordre', { ascending: true, nullsFirst: false })
-    .order('created_at', { ascending: false });
+    .order('id', { ascending: true });   // ordre d'affichage = ordre des id dans Supabase
   if (error) throw new Error('Catalogue indisponible : ' + error.message);
   State.tracks = (data || []).filter(t => t.fichier).map(t => {
     const tags = parseTags(t.hashtags);
