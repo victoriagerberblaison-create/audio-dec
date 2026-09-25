@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#faf6f0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="AudioDEC">
+<meta name="apple-mobile-web-app-title" content="Audiothèque">
 <meta name="robots" content="noindex">
-<title>DEC-ouverte — AudioDEC</title>
+<title>DEC-ouverte — Audiothèque</title>
 <style>
 /* =============================================================
    RESET & TOKENS — même palette que l'app flashcards
@@ -92,7 +92,9 @@ p { margin: 0 0 1em; }
 .masthead p { font-size: 15px; color: var(--ink-soft); line-height: 1.55; max-width: 34ch; }
 .auth-tabs { display: flex; border-bottom: 1px solid var(--rule); margin-bottom: 28px; }
 .auth-tab { flex: 1; padding: 14px 8px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .18em;
-  text-transform: uppercase; color: var(--ink); border-bottom: 2px solid var(--ec); margin-bottom: -1px; text-align: center; }
+  text-transform: uppercase; color: var(--ink-mute); border-bottom: 2px solid transparent; margin-bottom: -1px; text-align: center; }
+.auth-tab.active { color: var(--ink); border-bottom-color: var(--ec); }
+.masthead p b { color: var(--ink); font-weight: 600; }
 .auth-form { display: flex; flex-direction: column; gap: 14px; }
 .field { display: flex; flex-direction: column; gap: 6px; }
 .field label { font-family: var(--font-mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-mute); }
@@ -194,6 +196,14 @@ p { margin: 0 0 1em; }
   background-image: linear-gradient(45deg, transparent 50%, var(--ink-mute) 50%), linear-gradient(135deg, var(--ink-mute) 50%, transparent 50%);
   background-position: calc(100% - 18px) 55%, calc(100% - 13px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
 .chip.more { border-style: dashed; }
+.track.locked .t-title, .track.locked .t-desc, .track.locked .t-kicker, .track.locked .t-kw { opacity: .5; }
+.track.locked .t-play { background: var(--bg-deep); border-style: dashed; color: var(--ink-mute); }
+.track .t-play svg.i-lock { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; width: 16px; height: 16px; }
+.t-badge { font-family: var(--font-mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase;
+  padding: 3px 7px; border-radius: 999px; white-space: nowrap; }
+.t-badge.lock { color: var(--ink-soft); border: 1px solid var(--rule); background: var(--paper); }
+.t-badge.free { color: var(--ok); border: 1px solid var(--cac-soft); background: rgba(45,74,47,.06); }
+.dom button[data-d="free"].on { background: var(--ok); }
 .track .t-kicker { font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 3px; }
 .track .t-kicker .ec { color: var(--ec); }
 .track .t-kicker .cac { color: var(--cac); }
@@ -237,6 +247,41 @@ input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border: 0; bord
 .p-main svg { fill: currentColor; stroke: none; width: 22px; height: 22px; }
 .p-speed { font-family: var(--font-mono); font-size: 12px; width: 56px; border: 1px solid var(--rule); border-radius: 999px; height: 32px; }
 .p-err { font-size: 12px; color: var(--ec); margin-top: 6px; }
+
+/* =============================================================
+   QUOTA & FENÊTRE D'ABONNEMENT
+   ============================================================= */
+.quota { margin: -6px 0 20px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .04em; color: var(--ink-soft); }
+.quota:empty { display: none; }
+.quota .q-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.quota b { color: var(--ink); font-weight: 600; }
+.quota .q-cta { font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ec);
+  border: 1px solid var(--ec-soft); border-radius: 999px; padding: 6px 12px; white-space: nowrap; }
+.quota.low .bar > i { background: var(--ec); }
+.quota .bar > i { background: var(--ink-mute); }
+.quota.over { color: var(--ec); }
+.quota.sub { display: flex; justify-content: space-between; color: var(--ok); }
+.quota.sub a { color: var(--ink-soft); }
+body.no-scroll { overflow: hidden; }
+.paywall { position: fixed; inset: 0; z-index: 200; background: rgba(26,26,26,.45); display: flex; align-items: flex-end; justify-content: center;
+  padding: 16px; animation: pw-fade .2s ease-out; }
+@media (min-width: 561px) { .paywall { align-items: center; } }
+.pw-card { background: var(--bg); width: 100%; max-width: 440px; border-radius: var(--radius-l); padding: 28px 24px 22px;
+  box-shadow: 0 20px 60px rgba(26,26,26,.25); max-height: calc(100vh - 32px); overflow: auto; animation: pw-up .25s ease-out; }
+.pw-card .kicker { color: var(--ec); margin-bottom: 10px; }
+.pw-card h2 { font-size: 30px; line-height: 1.08; margin-bottom: 12px; }
+.pw-card h2 em { font-style: italic; font-weight: 400; color: var(--ec); }
+.pw-card p { font-size: 15px; color: var(--ink-soft); line-height: 1.5; }
+.pw-list { margin: 0 0 18px; font-size: 14px; color: var(--ink); }
+.pw-list li { padding: 7px 0 7px 22px; border-top: 1px solid var(--rule-soft); position: relative; }
+.pw-list li::before { content: '✓'; position: absolute; left: 2px; color: var(--ok); }
+.pw-price { font-family: var(--font-display); font-size: 26px; margin: 4px 0 16px; }
+.btn.warm { background: var(--ec); color: var(--bg); text-decoration: none; }
+.pw-msg { font-size: 13px; color: var(--ink-soft); margin-top: 12px; text-align: center; }
+.toast { position: fixed; left: 50%; top: 16px; transform: translateX(-50%); z-index: 300; background: var(--ink); color: var(--bg);
+  padding: 12px 18px; border-radius: var(--radius-m); font-size: 14px; max-width: calc(100% - 32px); box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+@keyframes pw-fade { from { opacity: 0; } }
+@keyframes pw-up { from { transform: translateY(24px); opacity: 0; } }
 
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
@@ -297,6 +342,13 @@ const DONE_MARGIN = 15;       // à moins de 15 s de la fin → considéré comm
 const LS = 'audiotheque:';
 const SPEEDS = [1, 1.25, 1.5, 1.75, 2, 0.75];
 
+// ABONNEMENT — à compléter quand l'offre Stripe est prête
+const PAYWALL = {
+  price: 'XX € / an',        // prix affiché dans la fenêtre
+  paymentLink: '',           // lien de paiement Stripe (https://buy.stripe.com/…). Vide = bouton « Bientôt disponible »
+  portalLink: '',            // facultatif : lien du portail client Stripe (gérer / résilier l'abonnement)
+};
+
 // ============================================================
 // SUPABASE
 // ============================================================
@@ -323,6 +375,7 @@ const State = {
   domaine: 'all',          // all | EC | CAC
   podcast: '',             // '' = tous
   showAllTags: false,
+  account: null,           // { listened_seconds, free_seconds, remaining_seconds, subscribed, period_end }
   status: 'all',             // all | wip | new | done
   currentId: null,
 };
@@ -348,6 +401,7 @@ function lsSet(k, v) { try { localStorage.setItem(LS + k, JSON.stringify(v)); } 
 
 const ICON_PLAY = '<path d="M7 4.5v15l13-7.5z"/>';
 const ICON_PAUSE = '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
+const ICON_LOCK = '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>';
 
 // ============================================================
 // CATALOGUE — table Supabase `audio_tracks`
@@ -361,7 +415,7 @@ function parseTags(txt) {
 }
 async function loadCatalog() {
   const { data, error } = await sb.from(TRACKS_TABLE)
-    .select('id, titre, podcast, domaine, hashtags, fichier, description, ordre, created_at')
+    .select('id, titre, podcast, domaine, hashtags, fichier, description, gratuit, created_at')
     .eq('publie', true)
     .order('id', { ascending: true });   // ordre d'affichage = ordre des id dans Supabase
   if (error) throw new Error('Catalogue indisponible : ' + error.message);
@@ -376,6 +430,7 @@ async function loadCatalog() {
       description: t.description || '',
       keywords: tags,
       duration: null,
+      free: t.gratuit === true,
       _search: norm([t.titre, t.podcast, t.domaine, t.description, tags.join(' ')].join(' ')),
     };
   });
@@ -390,7 +445,9 @@ const Urls = {
   expiresAt: 0,     // ms
   _pending: null,
 
-  fresh() { return Date.now() < this.expiresAt - 30 * 60 * 1000; },   // marge de 30 min
+  lifetime: 0,
+  // marge de renouvellement : 30 min, ou 20 % de la durée de vie si les liens sont courts
+  fresh() { return Date.now() < this.expiresAt - Math.min(30 * 60 * 1000, this.lifetime * 0.2); },
 
   async refresh() {
     if (this._pending) return this._pending;
@@ -398,7 +455,9 @@ const Urls = {
       const { data, error } = await sb.functions.invoke(AUDIO_FUNCTION, { body: {} });
       if (error) throw error;
       this.map = data.urls || {};
-      this.expiresAt = Date.now() + (Number(data.expires_in) || 3600) * 1000;
+      this.lifetime = (Number(data.expires_in) || 0) * 1000;
+      this.expiresAt = Date.now() + this.lifetime;
+      if (data.status) setStatus(data.status);
     })().finally(() => { this._pending = null; });
     return this._pending;
   },
@@ -409,6 +468,134 @@ const Urls = {
 };
 // Renouvellement automatique en arrière-plan
 setInterval(() => { if (State.user && !Urls.fresh()) Urls.refresh().catch(e => console.warn('Urls.refresh', e)); }, 5 * 60 * 1000);
+
+// ------------------------------------------------------------
+// ÉPISODES GRATUITS & ABONNEMENT
+// ------------------------------------------------------------
+async function loadStatus() {
+  const { data, error } = await sb.rpc('audio_status');
+  if (error) throw error;
+  setStatus(data);
+}
+function setStatus(st) {
+  if (!st) return;
+  const was = isSubscribed();
+  State.account = st;
+  renderQuota();
+  if (was !== isSubscribed()) renderList();
+}
+function isSubscribed() { return !!(State.account && State.account.subscribed); }
+function isLocked(t) { return !!t && !t.free && !isSubscribed(); }
+
+function renderQuota() {
+  const el = document.getElementById('quota');
+  if (!el || !State.account) return;
+  const st = State.account;
+  if (st.subscribed) {
+    const end = st.period_end ? new Date(st.period_end).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+    el.className = 'quota sub';
+    el.innerHTML = `<span>Abonnement actif${end ? ` · jusqu'au ${esc(end)}` : ''}</span>${PAYWALL.portalLink ? `<a href="${esc(PAYWALL.portalLink)}" target="_blank" rel="noopener">Gérer</a>` : ''}`;
+    return;
+  }
+  const free = State.tracks.filter(t => t.free).length;
+  const locked = State.tracks.length - free;
+  el.className = 'quota';
+  el.innerHTML = locked ? `
+    <div class="q-row">
+      <span><b>${free}</b> épisode${free > 1 ? 's' : ''} gratuit${free > 1 ? 's' : ''} · <b>${locked}</b> réservé${locked > 1 ? 's' : ''} aux abonnés</span>
+      <button type="button" class="q-cta" id="q-cta">S'abonner</button>
+    </div>` : '';
+  const cta = document.getElementById('q-cta');
+  if (cta) cta.onclick = () => showPaywall();
+}
+
+function paymentUrl() {
+  if (!PAYWALL.paymentLink || !State.user) return '';
+  const u = new URL(PAYWALL.paymentLink);
+  u.searchParams.set('client_reference_id', State.user.id);   // relie le paiement au compte
+  if (State.user.email) u.searchParams.set('prefilled_email', State.user.email);
+  return u.toString();
+}
+
+function showPaywall(track = null) {
+  closePaywall();
+  const url = paymentUrl();
+  const nLocked = State.tracks.filter(t => !t.free).length;
+  const box = document.createElement('div');
+  box.className = 'paywall';
+  box.id = 'paywall';
+  box.setAttribute('role', 'dialog');
+  box.setAttribute('aria-modal', 'true');
+  box.setAttribute('aria-labelledby', 'pw-title');
+  box.innerHTML = `
+    <div class="pw-card">
+      <div class="kicker">${track ? 'Réservé aux abonnés' : 'Abonnement annuel'}</div>
+      <h2 id="pw-title">Débloque<br>toute l'<em>audiothèque</em></h2>
+      <p>${track
+        ? `« ${esc(track.title)} » fait partie des épisodes réservés aux abonnés.`
+        : `L'abonnement annuel te donne accès à tous les épisodes.`}</p>
+      <ul class="pw-list">
+        <li>${nLocked ? `${nLocked} épisode${nLocked > 1 ? 's' : ''} en plus des gratuits` : 'Tous les podcasts EC & CAC'}, en illimité</li>
+        <li>Les nouveaux épisodes dès leur mise en ligne</li>
+        <li>Reprise là où tu t'es arrêté, sur tous tes appareils</li>
+      </ul>
+      <div class="pw-price">${esc(PAYWALL.price)}</div>
+      ${url
+        ? `<a class="btn warm" href="${esc(url)}" id="pw-buy">S'abonner</a>`
+        : `<button class="btn" disabled>Bientôt disponible</button>`}
+      <button type="button" class="btn secondary" id="pw-check" style="margin-top:10px;">J'ai déjà payé · actualiser</button>
+      <button type="button" class="btn ghost" id="pw-close" style="margin:14px auto 0;display:block;">Plus tard</button>
+      <div class="pw-msg" id="pw-msg" hidden></div>
+    </div>`;
+  document.body.appendChild(box);
+  document.body.classList.add('no-scroll');
+  box.querySelector('#pw-close').onclick = closePaywall;
+  box.addEventListener('click', e => { if (e.target === box) closePaywall(); });
+  box.querySelector('#pw-check').onclick = async () => {
+    const msg = box.querySelector('#pw-msg');
+    msg.hidden = false; msg.textContent = 'Vérification…';
+    try { await loadStatus(); } catch (e) {}
+    if (State.account && State.account.subscribed) {
+      msg.textContent = 'Abonnement activé, bonne écoute !';
+      await Urls.refresh().catch(() => {});
+      setTimeout(closePaywall, 900);
+    } else {
+      msg.textContent = 'Aucun abonnement trouvé pour ce compte pour l\'instant. Si tu viens de payer, réessaie dans quelques secondes.';
+    }
+  };
+  const first = box.querySelector('#pw-buy') || box.querySelector('#pw-check');
+  if (first) first.focus();
+}
+function closePaywall() {
+  const el = document.getElementById('paywall');
+  if (el) el.remove();
+  document.body.classList.remove('no-scroll');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePaywall(); });
+
+// Retour depuis Stripe (?abonnement=ok) : on attend que le webhook ait activé l'abonnement
+async function handleStripeReturn() {
+  const params = new URLSearchParams(location.search);
+  if (params.get('abonnement') !== 'ok') return;
+  history.replaceState(null, '', location.pathname + location.hash);
+  for (let i = 0; i < 15; i++) {
+    try { await loadStatus(); } catch (e) {}
+    if (State.account && State.account.subscribed) {
+      await Urls.refresh().catch(() => {});
+      closePaywall();
+      toast('Merci ! Ton abonnement est actif.');
+      return;
+    }
+    await new Promise(r => setTimeout(r, 2000));
+  }
+  toast('Paiement reçu. L\'activation prend un peu plus de temps : recharge la page dans une minute.');
+}
+function toast(text) {
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = text;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 6000);
+}
 
 function trackById(id) { return State.tracks.find(t => t.id === id); }
 
@@ -498,6 +685,8 @@ function humanizeAuthError(err) {
   const msg = (err && err.message) ? err.message : String(err);
   const low = msg.toLowerCase();
   if (low.includes('invalid login credentials')) return 'Email ou mot de passe incorrect.';
+  if (low.includes('user already registered')) return 'Un compte existe déjà pour cet email. Connecte-toi (ou utilise « Mot de passe oublié »).';
+  if (low.includes('signup') && low.includes('disabled')) return 'Les inscriptions sont fermées pour le moment.';
   if (low.includes('email not confirmed')) return 'Tu dois d\'abord confirmer ton email. Vérifie ta boîte mail.';
   if (low.includes('password should be')) return 'Mot de passe trop court (6 caractères minimum).';
   if (low.includes('rate limit')) return 'Trop de tentatives. Attends quelques minutes avant de réessayer.';
@@ -513,12 +702,17 @@ function renderAuth() {
         <a href="https://www.dec-ouverte.fr" target="_blank" rel="noopener" class="auth-logo-link">DEC-<em>ouverte</em></a>
       </div>
       <div class="masthead">
-        <div class="kicker">DEC · AudioDEC</div>
+        <div class="kicker">DEC · Audiothèque</div>
         <h1>Écouter<br>& <em>réviser</em></h1>
         <p>Tes contenus audio, où que tu sois. Reprends là où tu t'es arrêté.</p>
       </div>
 
-      <div class="auth-tabs"><div class="auth-tab">${mode === 'reset' ? 'Mot de passe oublié' : 'Connexion'}</div></div>
+      ${mode === 'reset'
+        ? `<div class="auth-tabs"><div class="auth-tab active">Mot de passe oublié</div></div>`
+        : `<div class="auth-tabs">
+            <button type="button" class="auth-tab ${mode === 'signin' ? 'active' : ''}" data-mode="signin">Connexion</button>
+            <button type="button" class="auth-tab ${mode === 'signup' ? 'active' : ''}" data-mode="signup">Créer un compte</button>
+          </div>`}
 
       ${mode === 'reset' ? `<div style="margin-bottom:18px;"><button type="button" class="btn ghost" id="back">← Retour à la connexion</button></div>` : ''}
       ${State.authError ? `<div class="error-msg">${esc(State.authError)}</div>` : ''}
@@ -529,21 +723,28 @@ function renderAuth() {
           <label for="auth-email">${mode === 'reset' ? 'Ton email' : 'Email'}</label>
           <input type="email" id="auth-email" required autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="prenom@exemple.fr">
         </div>
-        ${mode === 'reset' ? '' : `
+        ${mode === 'reset' ? '' : mode === 'signup' ? `
+        <div class="field">
+          <label for="auth-password">Choisis un mot de passe</label>
+          <input type="password" id="auth-password" required minlength="6" autocomplete="new-password" placeholder="au moins 6 caractères">
+        </div>` : `
         <div class="field">
           <label for="auth-password">Mot de passe</label>
           <input type="password" id="auth-password" required autocomplete="current-password">
         </div>
         <a href="#" class="forgot" id="forgot">Mot de passe oublié ?</a>`}
-        <button type="submit" class="btn">${mode === 'reset' ? 'Envoyer le lien' : 'Se connecter'}</button>
+        <button type="submit" class="btn">${mode === 'reset' ? 'Envoyer le lien' : mode === 'signup' ? 'Créer mon compte' : 'Se connecter'}</button>
       </form>
 
       <div class="disclaimer">
-        Utilise le même compte que pour les flashcards DEC-ouverte. Ta progression d'écoute est synchronisée entre tous tes appareils.
+        ${mode === 'signup' ? 'Crée ton compte pour écouter les épisodes gratuits. ' : ''}Le même compte fonctionne pour les flashcards DEC-ouverte. Ta progression d'écoute est synchronisée entre tous tes appareils.
       </div>
       <div class="footer">© DEC-ouverte by VGB, 2026 · <a href="mailto:contact@dec-ouverte.fr">contact@dec-ouverte.fr</a></div>
     </div>`;
 
+  view().querySelectorAll('.auth-tab[data-mode]').forEach(b => b.onclick = () => {
+    State.authMode = b.dataset.mode; State.authError = State.authInfo = null; renderAuth();
+  });
   const back = $('#back'); if (back) back.onclick = () => { State.authMode = 'signin'; State.authError = State.authInfo = null; renderAuth(); };
   const forgot = $('#forgot'); if (forgot) forgot.onclick = e => { e.preventDefault(); State.authMode = 'reset'; State.authError = State.authInfo = null; renderAuth(); };
 
@@ -561,6 +762,19 @@ function renderAuth() {
         if (error) throw error;
         State.authInfo = 'Si un compte existe pour cet email, un lien de réinitialisation vient d\'être envoyé. Vérifie ta boîte mail.';
         renderAuth();
+      } else if (State.authMode === 'signup') {
+        if (pwd.length < 6) throw new Error('Password should be at least 6 characters');
+        const { data, error } = await sb.auth.signUp({
+          email, password: pwd,
+          options: { emailRedirectTo: location.origin + location.pathname },
+        });
+        if (error) throw error;
+        // Adresse déjà inscrite : Supabase renvoie un utilisateur sans identité
+        if (data && data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+          throw new Error('User already registered');
+        }
+        if (!data.session) { State.pendingEmail = email; return render('verify'); }
+        // confirmation d'email désactivée : onAuthStateChange prend le relais
       } else {
         const { error } = await sb.auth.signInWithPassword({ email, password: pwd });
         if (error) throw error;
@@ -571,6 +785,22 @@ function renderAuth() {
       renderAuth();
     }
   });
+}
+
+function renderVerify() {
+  view().innerHTML = `
+    <div class="screen-auth">
+      <div class="masthead">
+        <div class="kicker">Compte créé</div>
+        <h1>Vérifie ta<br><em>boîte mail</em></h1>
+        <p>On vient d'envoyer un lien de confirmation à <b>${esc(State.pendingEmail || 'ton adresse')}</b>.
+        Clique dessus pour activer ton compte (pense à regarder dans les spams).</p>
+      </div>
+      <button class="btn" id="go-signin">J'ai confirmé, me connecter</button>
+      <button class="btn secondary" id="change-email" style="margin-top:10px;">Utiliser un autre email</button>
+    </div>`;
+  $('#go-signin').onclick = () => { State.authMode = 'signin'; State.authError = State.authInfo = null; render('auth'); };
+  $('#change-email').onclick = () => { State.authMode = 'signup'; State.pendingEmail = null; render('auth'); };
 }
 
 function renderRecovery() {
@@ -633,7 +863,8 @@ function filtered() {
       const tk = t.keywords.map(norm);
       if (!kws.every(k => tk.includes(k))) return false;
     }
-    if (State.domaine !== 'all' && !String(t.domaine).includes(State.domaine)) return false;
+    if (State.domaine === 'free') { if (!t.free) return false; }
+    else if (State.domaine !== 'all' && !String(t.domaine).includes(State.domaine)) return false;
     if (State.podcast && t.podcast !== State.podcast) return false;
     if (State.status !== 'all' && statusOf(t) !== State.status) return false;
     return true;
@@ -660,7 +891,7 @@ function highlight(text) {
 
 function lastInProgress() {
   return Object.values(State.progress)
-    .filter(p => !p.completed && (p.position || 0) > 1 && trackById(p.track_id))
+    .filter(p => !p.completed && (p.position || 0) > 1 && trackById(p.track_id) && !isLocked(trackById(p.track_id)))
     .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))[0] || null;
 }
 
@@ -668,7 +899,7 @@ function renderLibrary() {
   const email = State.user ? State.user.email : '';
   view().innerHTML = `
     <div class="topbar">
-      <div class="brand">Audio<em>DEC</em></div>
+      <div class="brand">Audio<em>thèque</em></div>
       <span class="who" title="${esc(email)}">${esc(email)}</span>
       <button class="btn ghost" id="logout">Quitter</button>
     </div>
@@ -677,6 +908,7 @@ function renderLibrary() {
         <div class="kicker">DEC-ouverte · ${State.tracks.length} titre${State.tracks.length > 1 ? 's' : ''}</div>
         <h1>Bibliothèque</h1>
       </div>
+      <div id="quota" class="quota"></div>
       <div id="resume-slot"></div>
       <label class="search">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
@@ -689,6 +921,7 @@ function renderLibrary() {
           <button data-d="all">Tout</button>
           <button data-d="EC" class="ec">EC</button>
           <button data-d="CAC" class="cac">CAC</button>
+          <button data-d="free">Gratuits</button>
         </div>
         ${allPodcasts().length ? `
         <label class="pod">
@@ -738,6 +971,7 @@ function renderLibrary() {
     if (State.currentId === id) togglePlay(); else playTrack(id);
   });
   renderList();
+  renderQuota();
 }
 
 function renderList() {
@@ -790,10 +1024,13 @@ function renderList() {
     if (st === 'wip') status = dur ? `${fmt(dur - p.position)} restant` : fmt(p.position);
     if (st === 'done') status = 'Écouté ✓';
     const pct = st === 'done' ? 100 : (st === 'wip' && dur ? Math.min(100, p.position / dur * 100) : 0);
+    const locked = isLocked(t);
+    if (locked) status = '';
+    const badge = locked ? '<span class="t-badge lock">Abonnés</span>' : (t.free && !isSubscribed() ? '<span class="t-badge free">Gratuit</span>' : '');
     return `
-      <li class="track ${cur ? 'current' : ''}" data-id="${esc(t.id)}">
-        <button class="t-play" aria-label="${cur && playing ? 'Pause' : 'Lire'} ${esc(t.title)}">
-          <svg viewBox="0 0 24 24">${cur && playing ? ICON_PAUSE : ICON_PLAY}</svg>
+      <li class="track ${cur ? 'current' : ''} ${locked ? 'locked' : ''}" data-id="${esc(t.id)}">
+        <button class="t-play" aria-label="${locked ? 'Réservé aux abonnés :' : cur && playing ? 'Pause' : 'Lire'} ${esc(t.title)}">
+          ${locked ? `<svg viewBox="0 0 24 24" class="i-lock">${ICON_LOCK}</svg>` : `<svg viewBox="0 0 24 24">${cur && playing ? ICON_PAUSE : ICON_PLAY}</svg>`}
         </button>
         <div class="t-body">
           ${(t.domaine || t.podcast) ? `<div class="t-kicker">${t.domaine ? `<span class="${t.domaine === 'CAC' ? 'cac' : 'ec'}">${esc(t.domaine)}</span>` : ''}${t.domaine && t.podcast ? ' · ' : ''}${highlight(t.podcast)}</div>` : ''}
@@ -801,10 +1038,10 @@ function renderList() {
           ${t.description ? `<div class="t-desc">${highlight(t.description)}</div>` : ''}
           <div class="t-meta">
             ${t.keywords.length ? `<span class="t-kw">${t.keywords.map(k => '#' + highlight(k)).join(' ')}</span>` : ''}
-            <span class="t-status ${st}">${status}</span>
+            ${badge}<span class="t-status ${st}">${status}</span>
           </div>
           ${pct ? `<div class="bar ${st === 'done' ? 'done' : ''}"><i style="width:${pct.toFixed(1)}%"></i></div>` : ''}
-          ${st !== 'new' ? `<button class="btn ghost" data-restart style="margin-top:6px;margin-left:-4px;font-size:10px;">↺ Recommencer</button>` : ''}
+          ${st !== 'new' && !locked ? `<button class="btn ghost" data-restart style="margin-top:6px;margin-left:-4px;font-size:10px;">↺ Recommencer</button>` : ''}
         </div>
       </li>`;
   }).join('');
@@ -836,12 +1073,14 @@ function showPlayer(show) {
 
 async function playTrack(id, opts = {}) {
   const t = trackById(id); if (!t) return;
+  if (isLocked(t)) { if (opts.autoplay !== false) showPaywall(t); return; }
   let src = Urls.fresh() ? Urls.get(id) : null;
   if (!src) {
     // Cas rare (liens expirés ou piste ajoutée depuis la connexion) : on redemande
     P.title.textContent = 'Chargement…'; showPlayer(true);
     try { await Urls.refresh(); } catch (e) { console.warn(e); }
     src = Urls.get(id);
+    if (!src && isLocked(t)) { P.title.textContent = t.title; showPaywall(t); return; }
     if (!src) {
       P.title.textContent = t.title; P.err.hidden = false;
       P.err.textContent = 'Lien audio indisponible. Vérifie ta connexion puis réessaie.';
@@ -872,7 +1111,7 @@ async function playTrack(id, opts = {}) {
   if (wantPlay) audio.play().catch(err => { if (err.name !== 'AbortError') console.warn(err); });
 
   if ('mediaSession' in navigator) {
-    navigator.mediaSession.metadata = new MediaMetadata({ title: t.title, artist: t.podcast || 'DEC-ouverte', album: 'DEC-ouverte · AudioDEC' });
+    navigator.mediaSession.metadata = new MediaMetadata({ title: t.title, artist: t.podcast || 'DEC-ouverte', album: 'DEC-ouverte · Audiothèque' });
   }
   lsSet('last', id);
   renderList();
@@ -880,6 +1119,8 @@ async function playTrack(id, opts = {}) {
 
 function togglePlay() {
   if (!audio.src) return;
+  const cur = trackById(State.currentId);
+  if (audio.paused && isLocked(cur)) return showPaywall(cur);
   audio.paused ? audio.play().catch(() => {}) : audio.pause();
 }
 
@@ -941,11 +1182,14 @@ let wantPlay = false;   // l'utilisateur a demandé la lecture (sert à relancer
 audio.addEventListener('error', async () => {
   const id = State.currentId;
   if (!audio.getAttribute('src') || !id) return;
+  const curT = trackById(id);
+  if (isLocked(curT)) { audio.pause(); return showPaywall(curT); }
   if (!retried) {
     retried = true;
     const pos = audio.currentTime || (State.progress[id] && State.progress[id].position) || 0;
     const wasPlaying = !audio.paused || wantPlay;
     try { await Urls.refresh(); } catch (e) {}
+    if (isLocked(curT)) return showPaywall(curT);
     return playTrack(id, { startAt: pos, autoplay: wasPlaying, isRetry: true });
   }
   P.err.hidden = false;
@@ -997,11 +1241,12 @@ function render(v) {
   State.view = v;
   if (v === 'auth') renderAuth();
   else if (v === 'recovery') renderRecovery();
+  else if (v === 'verify') renderVerify();
   else if (v === 'library') renderLibrary();
   else view().innerHTML = `
     <div class="splash">
       <div class="splash-kicker">DEC-ouverte</div>
-      <div class="splash-title">Audio<em>DEC</em></div>
+      <div class="splash-title">Audio<em>thèque</em></div>
       <div class="splash-dot"></div>
     </div>`;
 }
@@ -1010,7 +1255,7 @@ async function onSignedIn(session) {
   State.user = { id: session.user.id, email: session.user.email };
   render('splash');
   try {
-    await Promise.all([loadCatalog(), Progress.load()]);
+    await Promise.all([loadCatalog(), Progress.load(), loadStatus().catch(e => console.warn('Statut indisponible', e))]);
     await Urls.refresh().catch(e => console.warn('Liens audio indisponibles pour le moment', e));
   } catch (e) {
     console.error(e);
@@ -1026,13 +1271,15 @@ async function onSignedIn(session) {
     playTrack(t.id, { autoplay: false });
     setPlayIcon();
   }
+  handleStripeReturn();
 }
 
 function onSignedOut() {
   audio.pause(); audio.removeAttribute('src'); audio.load();
   showPlayer(false);
   Urls.clear();
-  Object.assign(State, { user: null, progress: {}, currentId: null, authMode: 'signin', authError: null, authInfo: null });
+  closePaywall();
+  Object.assign(State, { user: null, account: null, progress: {}, currentId: null, authMode: 'signin', authError: null, authInfo: null });
   render('auth');
 }
 
