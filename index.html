@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#faf6f0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Audiothèque">
+<meta name="robots" content="noindex">
+<title>DEC-ouverte — Audiothèque</title>
+<style>
+/* =============================================================
+   RESET & TOKENS — même palette que l'app flashcards
+   ============================================================= */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+button, input { font: inherit; color: inherit; }
+button { border: 0; background: none; cursor: pointer; padding: 0; }
+input { border: 0; background: none; outline: 0; }
+ul { list-style: none; margin: 0; padding: 0; }
+
+:root {
+  --bg:#faf6f0; --bg-deep:#f0ead9; --paper:#fffdf7;
+  --ink:#1a1a1a; --ink-soft:#5a4a3a; --ink-mute:#8a7b68;
+  --ec:#b5451e; --ec-soft:#e8c5b1; --cac:#2d4a2f; --cac-soft:#c5d4c5;
+  --rule:#d4c9b2; --rule-soft:#e8dec8; --ok:#2d4a2f;
+  --font-display:"Iowan Old Style","Palatino Linotype","Palatino",Georgia,"Times New Roman",serif;
+  --font-body:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --font-mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --radius-s:4px; --radius-m:10px; --radius-l:18px; --touch:48px;
+  --player-h: 0px;
+}
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body);
+  font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+  min-height: 100vh; overflow-x: hidden;
+  background-image:
+    radial-gradient(circle at 25% 15%, rgba(181,69,30,0.02) 0%, transparent 40%),
+    radial-gradient(circle at 75% 80%, rgba(45,74,47,0.02) 0%, transparent 40%);
+}
+#app {
+  max-width: 560px; margin: 0 auto; min-height: 100vh; position: relative;
+  background: var(--bg); box-shadow: 0 0 0 1px var(--rule-soft);
+}
+@media (min-width: 561px) {
+  body { padding: 24px 0; }
+  #app { min-height: calc(100vh - 48px); border-radius: var(--radius-l); }
+}
+
+h1, h2, h3 { font-family: var(--font-display); font-weight: 500; letter-spacing: -0.015em; margin: 0; color: var(--ink); }
+h1 { font-size: 34px; line-height: 1.1; }
+h2 { font-size: 22px; line-height: 1.2; }
+p { margin: 0 0 1em; }
+.kicker { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-mute); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: var(--touch); padding: 0 22px; font-size: 15px; font-weight: 500;
+  border-radius: var(--radius-m); transition: transform .1s, background .15s;
+  background: var(--ink); color: var(--bg); width: 100%;
+}
+.btn:active { transform: scale(0.98); }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn.secondary { background: var(--paper); color: var(--ink); border: 1px solid var(--rule); }
+.btn.ghost { background: transparent; color: var(--ink-soft); min-height: auto; padding: 4px; width: auto;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+
+/* =============================================================
+   SPLASH
+   ============================================================= */
+.splash { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; z-index: 1000; gap: 20px; }
+.splash-kicker { font-family: var(--font-mono); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--ink-mute); }
+.splash-title { font-family: var(--font-display); font-size: 28px; letter-spacing: -.01em; }
+.splash-title em { font-style: italic; color: var(--ec); }
+.splash-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ec); animation: pulse 1.2s infinite ease-in-out; }
+@keyframes pulse { 0%,100% { opacity: .3; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.2); } }
+
+/* =============================================================
+   AUTH — repris de l'app flashcards
+   ============================================================= */
+.screen-auth { padding: 48px 28px 40px; min-height: 100vh; display: flex; flex-direction: column; max-width: 430px; margin: 0 auto; }
+.auth-header { display: flex; justify-content: flex-end; margin-bottom: 32px; }
+.auth-logo-link { font-family: Georgia, "Times New Roman", serif; font-weight: 700; font-size: 15px; color: var(--ink); text-decoration: none; }
+.auth-logo-link em { font-style: italic; color: var(--ec); font-weight: 400; }
+.masthead { margin-bottom: 40px; }
+.masthead .kicker { margin-bottom: 14px; }
+.masthead h1 { font-size: 42px; line-height: 1.02; margin-bottom: 16px; }
+.masthead h1 em { font-style: italic; font-weight: 400; color: var(--ec); }
+.masthead p { font-size: 15px; color: var(--ink-soft); line-height: 1.55; max-width: 34ch; }
+.auth-tabs { display: flex; border-bottom: 1px solid var(--rule); margin-bottom: 28px; }
+.auth-tab { flex: 1; padding: 14px 8px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--ink); border-bottom: 2px solid var(--ec); margin-bottom: -1px; text-align: center; }
+.auth-form { display: flex; flex-direction: column; gap: 14px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-family: var(--font-mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-mute); }
+.auth-form input {
+  background: var(--paper); border: 1px solid var(--rule); border-radius: var(--radius-m);
+  padding: 14px 16px; font-size: 16px; min-height: var(--touch); width: 100%; -webkit-appearance: none; appearance: none;
+}
+.auth-form input:focus { border-color: var(--ink); }
+.forgot { align-self: flex-end; font-family: var(--font-mono); font-size: 11px; color: var(--ink-soft);
+  text-decoration: underline; text-underline-offset: 2px; padding: 4px; margin: -4px; letter-spacing: .06em; }
+.auth-form .btn { margin-top: 10px; }
+.error-msg, .info-msg { font-size: 13px; padding: 10px 14px; border-radius: 0 var(--radius-s) var(--radius-s) 0; line-height: 1.45; margin-bottom: 14px; }
+.error-msg { color: var(--ec); background: rgba(181,69,30,.06); border-left: 2px solid var(--ec); }
+.info-msg { color: var(--ink-soft); background: var(--bg-deep); border-left: 2px solid var(--ok); }
+.disclaimer { margin-top: auto; padding-top: 40px; font-size: 12px; color: var(--ink-mute); line-height: 1.55; }
+.footer { margin-top: 24px; padding-top: 20px; border-top: 1px dotted var(--rule); font-size: 11px; color: var(--ink-mute); text-align: center; }
+.footer a { color: inherit; }
+
+/* =============================================================
+   BIBLIOTHÈQUE
+   ============================================================= */
+.topbar {
+  position: sticky; top: 0; z-index: 10; background: rgba(250,246,240,.92);
+  backdrop-filter: saturate(180%) blur(10px); -webkit-backdrop-filter: saturate(180%) blur(10px);
+  border-bottom: 1px solid var(--rule-soft); padding: 12px 20px; display: flex; align-items: center; gap: 12px; min-height: 56px;
+}
+.topbar .brand { font-family: var(--font-display); font-size: 18px; flex: 1; min-width: 0; }
+.topbar .brand em { font-style: italic; color: var(--ec); }
+.topbar .who { font-family: var(--font-mono); font-size: 10px; color: var(--ink-mute); letter-spacing: .06em;
+  max-width: 40%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.lib { padding: 24px 20px calc(40px + var(--player-h)); }
+.lib-head { margin-bottom: 22px; }
+.lib-head .kicker { margin-bottom: 8px; }
+
+.resume-card {
+  display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
+  background: var(--paper); border: 1px solid var(--rule); border-left: 3px solid var(--ec);
+  border-radius: var(--radius-m); padding: 14px 16px; margin-bottom: 22px;
+}
+.resume-card .rc-body { flex: 1; min-width: 0; }
+.resume-card .rc-title { font-family: var(--font-display); font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.resume-card .rc-meta { font-family: var(--font-mono); font-size: 11px; color: var(--ink-mute); letter-spacing: .04em; }
+.round-play { width: 44px; height: 44px; border-radius: 50%; background: var(--ink); color: var(--bg);
+  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.round-play svg { width: 18px; height: 18px; fill: currentColor; }
+
+.search {
+  display: flex; align-items: center; gap: 10px; background: var(--paper); border: 1px solid var(--rule);
+  border-radius: var(--radius-m); padding: 0 14px; min-height: var(--touch); margin-bottom: 14px;
+}
+.search:focus-within { border-color: var(--ink); }
+.search svg { width: 18px; height: 18px; stroke: var(--ink-mute); fill: none; stroke-width: 1.8; flex-shrink: 0; }
+.search input { flex: 1; min-width: 0; font-size: 16px; padding: 12px 0; }
+.search .clear { color: var(--ink-mute); font-size: 18px; padding: 4px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.chip {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; padding: 7px 11px;
+  border: 1px solid var(--rule); border-radius: 999px; background: var(--paper); color: var(--ink-soft);
+}
+.chip.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+.seg { display: flex; border-bottom: 1px solid var(--rule); margin-bottom: 8px; }
+.seg button { flex: 1; padding: 12px 4px; font-family: var(--font-mono); font-size: 10px; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--ink-mute); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.seg button.on { color: var(--ink); border-bottom-color: var(--ec); }
+
+.count { font-family: var(--font-mono); font-size: 11px; color: var(--ink-mute); letter-spacing: .06em; margin: 14px 0 4px; }
+
+.track { display: flex; gap: 14px; align-items: flex-start; padding: 16px 0; border-bottom: 1px solid var(--rule-soft); cursor: pointer; }
+.track:last-child { border-bottom: 0; }
+.track .t-play { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--rule); background: var(--paper);
+  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--ink); }
+.track .t-play svg { width: 14px; height: 14px; fill: currentColor; }
+.track.current .t-play { background: var(--ec); border-color: var(--ec); color: var(--bg); }
+.track .t-body { flex: 1; min-width: 0; }
+.track .t-title { font-family: var(--font-display); font-size: 17px; line-height: 1.3; }
+.track.current .t-title { color: var(--ec); }
+.track .t-desc { font-size: 13px; color: var(--ink-soft); line-height: 1.45; margin-top: 3px; }
+.track .t-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 8px; }
+.track .t-kw { font-family: var(--font-mono); font-size: 10px; letter-spacing: .06em; color: var(--ink-mute); }
+.track .t-status { font-family: var(--font-mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); margin-left: auto; white-space: nowrap; }
+.track .t-status.done { color: var(--ok); }
+.track .t-status.wip { color: var(--ec); }
+.bar { height: 3px; background: var(--rule-soft); border-radius: 2px; overflow: hidden; margin-top: 8px; }
+.bar > i { display: block; height: 100%; background: var(--ec); }
+.bar.done > i { background: var(--ok); }
+.filters { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+.dom { display: inline-flex; border: 1px solid var(--rule); border-radius: 999px; overflow: hidden; background: var(--paper); }
+.dom button { font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; padding: 8px 14px; color: var(--ink-soft); }
+.dom button + button { border-left: 1px solid var(--rule); }
+.dom button.on { background: var(--ink); color: var(--bg); }
+.dom button.ec.on { background: var(--ec); }
+.dom button.cac.on { background: var(--cac); }
+.pod { flex: 1; min-width: 160px; }
+.pod select { width: 100%; font: inherit; font-size: 14px; color: var(--ink); background-color: var(--paper); border: 1px solid var(--rule);
+  border-radius: 999px; padding: 8px 32px 8px 14px; -webkit-appearance: none; appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink-mute) 50%), linear-gradient(135deg, var(--ink-mute) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 55%, calc(100% - 13px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
+.chip.more { border-style: dashed; }
+.track .t-kicker { font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 3px; }
+.track .t-kicker .ec { color: var(--ec); }
+.track .t-kicker .cac { color: var(--cac); }
+mark { background: var(--ec-soft); color: inherit; border-radius: 2px; padding: 0 1px; }
+
+.empty { text-align: center; padding: 48px 12px; color: var(--ink-soft); font-size: 14px; }
+.empty h2 { margin-bottom: 8px; }
+
+/* =============================================================
+   LECTEUR (fixe en bas)
+   ============================================================= */
+.player {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+  max-width: 560px; margin: 0 auto; background: var(--paper);
+  border-top: 1px solid var(--rule); box-shadow: 0 -8px 24px rgba(26,26,26,.06);
+  padding: 12px 18px calc(12px + env(safe-area-inset-bottom));
+}
+@media (min-width: 561px) { .player { border: 1px solid var(--rule); border-bottom: 0; border-radius: var(--radius-l) var(--radius-l) 0 0; } }
+.player[hidden] { display: none; }
+.p-top { display: flex; align-items: center; gap: 10px; }
+.p-title { flex: 1; min-width: 0; font-family: var(--font-display); font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-sync { font-family: var(--font-mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); }
+.p-seek { display: flex; align-items: center; gap: 10px; margin: 8px 0 4px; }
+.p-time { font-family: var(--font-mono); font-size: 11px; color: var(--ink-mute); min-width: 42px; font-variant-numeric: tabular-nums; }
+.p-time.r { text-align: right; }
+input[type=range] { -webkit-appearance: none; appearance: none; flex: 1; height: 24px; background: transparent; cursor: pointer; }
+input[type=range]::-webkit-slider-runnable-track { height: 3px; border-radius: 2px;
+  background: linear-gradient(to right, var(--ec) var(--pct,0%), var(--rule) var(--pct,0%)); }
+input[type=range]::-moz-range-track { height: 3px; border-radius: 2px; background: var(--rule); }
+input[type=range]::-moz-range-progress { height: 3px; background: var(--ec); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--ink); margin-top: -5.5px; }
+input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border: 0; border-radius: 50%; background: var(--ink); }
+.p-ctrl { display: flex; align-items: center; justify-content: space-between; }
+.p-btn { width: var(--touch); height: var(--touch); display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%; color: var(--ink); position: relative; }
+.p-btn:active { background: var(--rule-soft); }
+.p-btn svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.p-btn .n { position: absolute; font-family: var(--font-mono); font-size: 8px; font-weight: 600; top: 50%; left: 50%; transform: translate(-50%,-40%); }
+.p-main { width: 56px; height: 56px; background: var(--ink); color: var(--bg); }
+.p-main:active { background: var(--ink-soft); }
+.p-main svg { fill: currentColor; stroke: none; width: 22px; height: 22px; }
+.p-speed { font-family: var(--font-mono); font-size: 12px; width: 56px; border: 1px solid var(--rule); border-radius: 999px; height: 32px; }
+.p-err { font-size: 12px; color: var(--ec); margin-top: 6px; }
+
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+<script src="vendor/supabase.js"></script>
+</head>
+<body>
+<div id="app"><div id="view"></div></div>
+
+<div class="player" id="player" hidden>
+  <div class="p-top">
+    <div class="p-title" id="p-title">—</div>
+    <span class="p-sync" id="p-sync"></span>
+  </div>
+  <div class="p-seek">
+    <span class="p-time" id="p-cur">0:00</span>
+    <input type="range" id="p-seek" min="0" max="100" step="0.1" value="0" aria-label="Position">
+    <span class="p-time r" id="p-left">-0:00</span>
+  </div>
+  <div class="p-ctrl">
+    <button class="p-btn p-speed" id="p-speed" aria-label="Vitesse de lecture">1×</button>
+    <button class="p-btn" id="p-back" aria-label="Reculer de 15 secondes">
+      <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg><span class="n">15</span>
+    </button>
+    <button class="p-btn p-main" id="p-play" aria-label="Lecture">
+      <svg viewBox="0 0 24 24" id="p-play-icon"><path d="M7 4.5v15l13-7.5z"/></svg>
+    </button>
+    <button class="p-btn" id="p-fwd" aria-label="Avancer de 30 secondes">
+      <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg><span class="n">30</span>
+    </button>
+    <button class="p-btn" id="p-close" aria-label="Fermer le lecteur">
+      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div class="p-err" id="p-err" hidden></div>
+</div>
+
+<audio id="audio" preload="metadata"></audio>
+
+<script>
+(function () {
+'use strict';
+
+// ============================================================
+// CONFIG
+// ============================================================
+// Même projet Supabase que l'app flashcards → mêmes comptes.
+const SUPABASE_URL = 'https://cqomkjlitacyzzryiddh.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_NCRBvCjIDu8GMKur6NgmFg_TXI-7zHb';
+
+// Les fichiers audio sont dans un bucket Cloudflare R2 privé.
+// L'Edge Function Supabase « audio-url » vérifie la connexion et renvoie des liens temporaires.
+const AUDIO_FUNCTION = 'audio-url';
+const TRACKS_TABLE = 'audio_tracks';  // table Supabase du catalogue
+
+const SAVE_EVERY_MS = 10000;  // sauvegarde Supabase toutes les 10 s pendant la lecture
+const DONE_MARGIN = 15;       // à moins de 15 s de la fin → considéré comme écouté
+const LS = 'audiotheque:';
+const SPEEDS = [1, 1.25, 1.5, 1.75, 2, 0.75];
+
+// ============================================================
+// SUPABASE
+// ============================================================
+let sb = null;
+try {
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+  });
+} catch (e) { console.error('Supabase init failed', e); }
+
+// ============================================================
+// ÉTAT
+// ============================================================
+const State = {
+  user: null,
+  view: 'splash',            // splash | auth | recovery | library
+  authMode: 'signin',        // signin | reset
+  authError: null,
+  authInfo: null,
+  tracks: [],
+  progress: {},              // { [trackId]: { position, duration, completed, updated_at } }
+  query: '',
+  keywords: new Set(),
+  domaine: 'all',          // all | EC | CAC
+  podcast: '',             // '' = tous
+  showAllTags: false,
+  status: 'all',             // all | wip | new | done
+  currentId: null,
+};
+
+const $ = (s, r = document) => r.querySelector(s);
+const view = () => document.getElementById('view');
+const audio = document.getElementById('audio');
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+function norm(s) {
+  return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+function fmt(sec) {
+  if (!isFinite(sec) || sec < 0) sec = 0;
+  sec = Math.floor(sec);
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  return h ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : `${m}:${String(s).padStart(2,'0')}`;
+}
+function lsGet(k, d) { try { const v = localStorage.getItem(LS + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
+function lsSet(k, v) { try { localStorage.setItem(LS + k, JSON.stringify(v)); } catch (e) {} }
+
+const ICON_PLAY = '<path d="M7 4.5v15l13-7.5z"/>';
+const ICON_PAUSE = '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
+
+// ============================================================
+// CATALOGUE — table Supabase `audio_tracks`
+// ============================================================
+function parseTags(txt) {
+  if (Array.isArray(txt)) txt = txt.join(',');
+  const seen = new Set();
+  return String(txt || '').split(/[#,;\n]+/).map(s => s.trim()).filter(s => {
+    const k = norm(s); if (!s || seen.has(k)) return false; seen.add(k); return true;
+  });
+}
+async function loadCatalog() {
+  const { data, error } = await sb.from(TRACKS_TABLE)
+    .select('id, titre, podcast, domaine, hashtags, fichier, description, ordre, created_at')
+    .eq('publie', true)
+    .order('ordre', { ascending: true, nullsFirst: false })
+    .order('created_at', { ascending: false });
+  if (error) throw new Error('Catalogue indisponible : ' + error.message);
+  State.tracks = (data || []).filter(t => t.fichier).map(t => {
+    const tags = parseTags(t.hashtags);
+    return {
+      id: String(t.id),
+      title: t.titre || 'Sans titre',
+      podcast: (t.podcast || '').trim(),
+      domaine: t.domaine || '',
+      file: t.fichier.trim(),
+      description: t.description || '',
+      keywords: tags,
+      duration: null,
+      _search: norm([t.titre, t.podcast, t.domaine, t.description, tags.join(' ')].join(' ')),
+    };
+  });
+}
+// ------------------------------------------------------------
+// LIENS TEMPORAIRES (Cloudflare R2 via l'Edge Function)
+// ------------------------------------------------------------
+// Tous les liens sont demandés en une fois à la connexion : ainsi le clic sur ▶ lance
+// la lecture immédiatement (iOS refuse de lancer un son après une attente réseau).
+const Urls = {
+  map: {},          // { [trackId]: url }
+  expiresAt: 0,     // ms
+  _pending: null,
+
+  fresh() { return Date.now() < this.expiresAt - 30 * 60 * 1000; },   // marge de 30 min
+
+  async refresh() {
+    if (this._pending) return this._pending;
+    this._pending = (async () => {
+      const { data, error } = await sb.functions.invoke(AUDIO_FUNCTION, { body: {} });
+      if (error) throw error;
+      this.map = data.urls || {};
+      this.expiresAt = Date.now() + (Number(data.expires_in) || 3600) * 1000;
+    })().finally(() => { this._pending = null; });
+    return this._pending;
+  },
+
+  async ensure() { if (!this.fresh()) await this.refresh(); },
+  get(id) { return this.map[id] || null; },
+  clear() { this.map = {}; this.expiresAt = 0; },
+};
+// Renouvellement automatique en arrière-plan
+setInterval(() => { if (State.user && !Urls.fresh()) Urls.refresh().catch(e => console.warn('Urls.refresh', e)); }, 5 * 60 * 1000);
+
+function trackById(id) { return State.tracks.find(t => t.id === id); }
+
+// ============================================================
+// PROGRESSION — Supabase (source de vérité) + cache local
+// ============================================================
+const Progress = {
+  key() { return 'progress:' + (State.user ? State.user.id : 'anon'); },
+
+  async load() {
+    const local = lsGet(this.key(), {});
+    let remote = {};
+    try {
+      const { data, error } = await sb.from('audio_progress')
+        .select('track_id, position, duration, completed, updated_at');
+      if (error) throw error;
+      (data || []).forEach(r => { remote[r.track_id] = r; });
+    } catch (e) {
+      console.warn('Chargement progression Supabase impossible, cache local utilisé.', e);
+    }
+    // Fusion : on garde la version la plus récente ; on repousse vers Supabase ce qui était plus récent en local
+    const merged = { ...remote };
+    const toPush = [];
+    Object.entries(local).forEach(([id, l]) => {
+      const r = remote[id];
+      if (!r || new Date(l.updated_at) > new Date(r.updated_at)) { merged[id] = l; toPush.push(id); }
+    });
+    State.progress = merged;
+    lsSet(this.key(), merged);
+    toPush.forEach(id => this.push(id));
+  },
+
+  set(id, patch, pushNow) {
+    const prev = State.progress[id] || { position: 0, duration: null, completed: false };
+    State.progress[id] = { ...prev, ...patch, track_id: id, updated_at: new Date().toISOString() };
+    lsSet(this.key(), State.progress);
+    if (pushNow) this.push(id);
+  },
+
+  _inflight: {},
+  async push(id) {
+    if (!State.user || !sb) return;
+    const p = State.progress[id];
+    if (!p) return;
+    if (this._inflight[id]) { this._inflight[id].again = true; return; }
+    this._inflight[id] = { again: false };
+    setSync('…');
+    try {
+      const { error } = await sb.from('audio_progress').upsert({
+        user_id: State.user.id,
+        track_id: id,
+        position: Math.round((p.position || 0) * 10) / 10,
+        duration: p.duration ? Math.round(p.duration * 10) / 10 : null,
+        completed: !!p.completed,
+        updated_at: p.updated_at,
+      }, { onConflict: 'user_id,track_id' });
+      if (error) throw error;
+      setSync('Synchronisé');
+    } catch (e) {
+      console.warn('Sauvegarde progression échouée (gardée en local)', e);
+      setSync('Hors ligne');
+    } finally {
+      const again = this._inflight[id].again;
+      delete this._inflight[id];
+      if (again) this.push(id);
+    }
+  },
+
+  async reset(id) {
+    this.set(id, { position: 0, completed: false }, true);
+  }
+};
+
+let syncTimer = null;
+function setSync(txt) {
+  const el = document.getElementById('p-sync');
+  if (!el) return;
+  el.textContent = txt;
+  clearTimeout(syncTimer);
+  if (txt === 'Synchronisé') syncTimer = setTimeout(() => { el.textContent = ''; }, 2000);
+}
+
+// ============================================================
+// AUTH — mêmes comptes que l'app flashcards (connexion seule)
+// ============================================================
+function humanizeAuthError(err) {
+  const msg = (err && err.message) ? err.message : String(err);
+  const low = msg.toLowerCase();
+  if (low.includes('invalid login credentials')) return 'Email ou mot de passe incorrect.';
+  if (low.includes('email not confirmed')) return 'Tu dois d\'abord confirmer ton email. Vérifie ta boîte mail.';
+  if (low.includes('password should be')) return 'Mot de passe trop court (6 caractères minimum).';
+  if (low.includes('rate limit')) return 'Trop de tentatives. Attends quelques minutes avant de réessayer.';
+  if (low.includes('network') || low.includes('fetch')) return 'Problème de connexion. Vérifie ton réseau.';
+  return msg;
+}
+
+function renderAuth() {
+  const mode = State.authMode;
+  view().innerHTML = `
+    <div class="screen-auth">
+      <div class="auth-header">
+        <a href="https://www.dec-ouverte.fr" target="_blank" rel="noopener" class="auth-logo-link">DEC-<em>ouverte</em></a>
+      </div>
+      <div class="masthead">
+        <div class="kicker">DEC · Audiothèque</div>
+        <h1>Écouter<br>& <em>réviser</em></h1>
+        <p>Tes contenus audio, où que tu sois. Reprends là où tu t'es arrêté.</p>
+      </div>
+
+      <div class="auth-tabs"><div class="auth-tab">${mode === 'reset' ? 'Mot de passe oublié' : 'Connexion'}</div></div>
+
+      ${mode === 'reset' ? `<div style="margin-bottom:18px;"><button type="button" class="btn ghost" id="back">← Retour à la connexion</button></div>` : ''}
+      ${State.authError ? `<div class="error-msg">${esc(State.authError)}</div>` : ''}
+      ${State.authInfo ? `<div class="info-msg">${esc(State.authInfo)}</div>` : ''}
+
+      <form id="auth-form" class="auth-form" autocomplete="on" novalidate>
+        <div class="field">
+          <label for="auth-email">${mode === 'reset' ? 'Ton email' : 'Email'}</label>
+          <input type="email" id="auth-email" required autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="prenom@exemple.fr">
+        </div>
+        ${mode === 'reset' ? '' : `
+        <div class="field">
+          <label for="auth-password">Mot de passe</label>
+          <input type="password" id="auth-password" required autocomplete="current-password">
+        </div>
+        <a href="#" class="forgot" id="forgot">Mot de passe oublié ?</a>`}
+        <button type="submit" class="btn">${mode === 'reset' ? 'Envoyer le lien' : 'Se connecter'}</button>
+      </form>
+
+      <div class="disclaimer">
+        Utilise le même compte que pour les flashcards DEC-ouverte. Ta progression d'écoute est synchronisée entre tous tes appareils.
+      </div>
+      <div class="footer">© DEC-ouverte by VGB, 2026 · <a href="mailto:contact@dec-ouverte.fr">contact@dec-ouverte.fr</a></div>
+    </div>`;
+
+  const back = $('#back'); if (back) back.onclick = () => { State.authMode = 'signin'; State.authError = State.authInfo = null; renderAuth(); };
+  const forgot = $('#forgot'); if (forgot) forgot.onclick = e => { e.preventDefault(); State.authMode = 'reset'; State.authError = State.authInfo = null; renderAuth(); };
+
+  $('#auth-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = e.currentTarget.querySelector('button[type=submit]');
+    const email = ($('#auth-email').value || '').trim().toLowerCase();
+    const pwd = $('#auth-password') ? $('#auth-password').value : '';
+    if (!email) { State.authError = 'Merci de saisir ton email.'; return renderAuth(); }
+    btn.disabled = true; btn.textContent = '…';
+    State.authError = State.authInfo = null;
+    try {
+      if (State.authMode === 'reset') {
+        const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname });
+        if (error) throw error;
+        State.authInfo = 'Si un compte existe pour cet email, un lien de réinitialisation vient d\'être envoyé. Vérifie ta boîte mail.';
+        renderAuth();
+      } else {
+        const { error } = await sb.auth.signInWithPassword({ email, password: pwd });
+        if (error) throw error;
+        // onAuthStateChange prend le relais
+      }
+    } catch (err) {
+      State.authError = humanizeAuthError(err);
+      renderAuth();
+    }
+  });
+}
+
+function renderRecovery() {
+  view().innerHTML = `
+    <div class="screen-auth">
+      <div class="masthead">
+        <div class="kicker">Réinitialisation</div>
+        <h1>Nouveau<br><em>mot de passe</em></h1>
+      </div>
+      ${State.authError ? `<div class="error-msg">${esc(State.authError)}</div>` : ''}
+      <form id="rec-form" class="auth-form">
+        <div class="field">
+          <label for="new-pwd">Choisis un mot de passe</label>
+          <input type="password" id="new-pwd" required minlength="6" autocomplete="new-password" placeholder="au moins 6 caractères">
+        </div>
+        <button type="submit" class="btn">Enregistrer</button>
+      </form>
+    </div>`;
+  $('#rec-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const pwd = $('#new-pwd').value;
+    if (pwd.length < 6) { State.authError = 'Le mot de passe doit faire au moins 6 caractères.'; return renderRecovery(); }
+    try {
+      const { error } = await sb.auth.updateUser({ password: pwd });
+      if (error) throw error;
+      State.authError = null;
+      const { data } = await sb.auth.getSession();
+      if (data && data.session) await onSignedIn(data.session);
+    } catch (err) { State.authError = humanizeAuthError(err); renderRecovery(); }
+  });
+}
+
+// ============================================================
+// BIBLIOTHÈQUE
+// ============================================================
+function statusOf(t) {
+  const p = State.progress[t.id];
+  if (!p) return 'new';
+  if (p.completed) return 'done';
+  if ((p.position || 0) > 1) return 'wip';
+  return 'new';
+}
+function allPodcasts() {
+  return [...new Set(State.tracks.map(t => t.podcast).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
+}
+function allKeywords() {
+  const count = new Map();
+  State.tracks.forEach(t => t.keywords.forEach(k => {
+    const key = k.trim(); if (!key) return;
+    count.set(key, (count.get(key) || 0) + 1);
+  }));
+  return [...count.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'fr')).map(e => e[0]);
+}
+function filtered() {
+  const terms = norm(State.query).split(/\s+/).filter(Boolean);
+  const kws = [...State.keywords].map(norm);
+  return State.tracks.filter(t => {
+    if (terms.length && !terms.every(w => t._search.includes(w))) return false;
+    if (kws.length) {
+      const tk = t.keywords.map(norm);
+      if (!kws.every(k => tk.includes(k))) return false;
+    }
+    if (State.domaine !== 'all' && !String(t.domaine).includes(State.domaine)) return false;
+    if (State.podcast && t.podcast !== State.podcast) return false;
+    if (State.status !== 'all' && statusOf(t) !== State.status) return false;
+    return true;
+  });
+}
+function highlight(text) {
+  const terms = norm(State.query).split(/\s+/).filter(w => w.length > 1);
+  const safe = esc(text);
+  if (!terms.length) return safe;
+  // surlignage insensible aux accents : on travaille sur la version normalisée (même longueur que l'original échappé seulement si pas d'entités) → on reste simple
+  const src = String(text || '');
+  const n = norm(src);
+  const marks = new Array(src.length).fill(false);
+  terms.forEach(w => { let i = 0; while ((i = n.indexOf(w, i)) !== -1) { for (let j = i; j < i + w.length; j++) marks[j] = true; i += w.length; } });
+  if (n.length !== src.length) return safe;
+  let out = '', open = false;
+  for (let i = 0; i < src.length; i++) {
+    if (marks[i] && !open) { out += '<mark>'; open = true; }
+    if (!marks[i] && open) { out += '</mark>'; open = false; }
+    out += esc(src[i]);
+  }
+  return out + (open ? '</mark>' : '');
+}
+
+function lastInProgress() {
+  return Object.values(State.progress)
+    .filter(p => !p.completed && (p.position || 0) > 1 && trackById(p.track_id))
+    .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))[0] || null;
+}
+
+function renderLibrary() {
+  const email = State.user ? State.user.email : '';
+  view().innerHTML = `
+    <div class="topbar">
+      <div class="brand">Audio<em>thèque</em></div>
+      <span class="who" title="${esc(email)}">${esc(email)}</span>
+      <button class="btn ghost" id="logout">Quitter</button>
+    </div>
+    <div class="lib">
+      <div class="lib-head">
+        <div class="kicker">DEC-ouverte · ${State.tracks.length} titre${State.tracks.length > 1 ? 's' : ''}</div>
+        <h1>Bibliothèque</h1>
+      </div>
+      <div id="resume-slot"></div>
+      <label class="search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <span class="visually-hidden">Rechercher</span>
+        <input type="search" id="q" placeholder="Titre, podcast, mot-clé…" value="${esc(State.query)}" autocomplete="off">
+        <button type="button" class="clear" id="q-clear" aria-label="Effacer" ${State.query ? '' : 'hidden'}>×</button>
+      </label>
+      <div class="filters">
+        <div class="dom" id="dom">
+          <button data-d="all">Tout</button>
+          <button data-d="EC" class="ec">EC</button>
+          <button data-d="CAC" class="cac">CAC</button>
+        </div>
+        ${allPodcasts().length ? `
+        <label class="pod">
+          <span class="visually-hidden">Podcast</span>
+          <select id="pod">
+            <option value="">Tous les podcasts</option>
+            ${allPodcasts().map(p => `<option value="${esc(p)}" ${State.podcast === p ? 'selected' : ''}>${esc(p)}</option>`).join('')}
+          </select>
+        </label>` : ''}
+      </div>
+      <div class="chips" id="chips"></div>
+      <div class="seg" id="seg">
+        <button data-s="all">Tous</button>
+        <button data-s="wip">En cours</button>
+        <button data-s="new">Nouveaux</button>
+        <button data-s="done">Écoutés</button>
+      </div>
+      <div class="count" id="count"></div>
+      <ul id="list"></ul>
+    </div>`;
+
+  $('#logout').onclick = async () => { await saveNow(); await sb.auth.signOut(); };
+  const q = $('#q');
+  q.addEventListener('input', () => { State.query = q.value; $('#q-clear').hidden = !q.value; renderList(); });
+  $('#q-clear').onclick = () => { State.query = ''; q.value = ''; $('#q-clear').hidden = true; renderList(); q.focus(); };
+  $('#seg').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    State.status = b.dataset.s; renderList();
+  });
+  $('#dom').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    State.domaine = b.dataset.d; renderList();
+  });
+  const pod = $('#pod'); if (pod) pod.onchange = () => { State.podcast = pod.value; renderList(); };
+  $('#chips').addEventListener('click', e => {
+    const b = e.target.closest('.chip'); if (!b) return;
+    const k = b.dataset.k;
+    if (k === '__more') { State.showAllTags = !State.showAllTags; return renderList(); }
+    if (k === '__all') State.keywords.clear();
+    else State.keywords.has(k) ? State.keywords.delete(k) : State.keywords.add(k);
+    renderList();
+  });
+  $('#list').addEventListener('click', e => {
+    const li = e.target.closest('.track'); if (!li) return;
+    const id = li.dataset.id;
+    if (e.target.closest('[data-restart]')) { Progress.reset(id); if (State.currentId === id) audio.currentTime = 0; renderList(); return; }
+    if (State.currentId === id) togglePlay(); else playTrack(id);
+  });
+  renderList();
+}
+
+function renderList() {
+  if (State.view !== 'library') return;
+  // Reprendre
+  const last = lastInProgress();
+  const slot = $('#resume-slot');
+  if (last && last.track_id !== State.currentId) {
+    const t = trackById(last.track_id);
+    slot.innerHTML = `
+      <button class="resume-card" id="resume">
+        <div class="rc-body">
+          <div class="kicker" style="font-size:10px;margin-bottom:2px;">Reprendre</div>
+          <div class="rc-title">${esc(t.title)}</div>
+          ${t.podcast ? `<div class="rc-meta">${esc(t.podcast)}</div>` : ''}
+          <div class="rc-meta">${fmt(last.position)}${last.duration ? ' / ' + fmt(last.duration) : ''}</div>
+        </div>
+        <span class="round-play"><svg viewBox="0 0 24 24">${ICON_PLAY}</svg></span>
+      </button>`;
+    $('#resume').onclick = () => playTrack(t.id);
+  } else slot.innerHTML = '';
+
+  // Mots-clés
+  const kws = allKeywords();
+  const MAX_TAGS = 12;
+  let shown = State.showAllTags ? kws : kws.slice(0, MAX_TAGS);
+  State.keywords.forEach(k => { if (!shown.includes(k)) shown = shown.concat(k); }); // un tag actif reste visible
+  $('#chips').innerHTML = kws.length ? `
+    <button class="chip ${State.keywords.size ? '' : 'on'}" data-k="__all">Tous</button>
+    ${shown.map(k => `<button class="chip ${State.keywords.has(k) ? 'on' : ''}" data-k="${esc(k)}">#${esc(k)}</button>`).join('')}
+    ${kws.length > MAX_TAGS ? `<button class="chip more" data-k="__more">${State.showAllTags ? 'Moins' : '+ ' + (kws.length - MAX_TAGS)}</button>` : ''}` : '';
+  document.querySelectorAll('#dom button').forEach(b => b.classList.toggle('on', b.dataset.d === State.domaine));
+
+  document.querySelectorAll('#seg button').forEach(b => b.classList.toggle('on', b.dataset.s === State.status));
+
+  const items = filtered();
+  $('#count').textContent = items.length === State.tracks.length ? `${items.length} titre${items.length > 1 ? 's' : ''}` : `${items.length} sur ${State.tracks.length}`;
+
+  if (!items.length) {
+    $('#list').innerHTML = `<li class="empty"><h2>Aucun titre</h2>Essaie un autre mot-clé ou retire un filtre.</li>`;
+    return;
+  }
+  const playing = !audio.paused;
+  $('#list').innerHTML = items.map(t => {
+    const p = State.progress[t.id];
+    const st = statusOf(t);
+    const dur = (p && p.duration) || t.duration;
+    const cur = State.currentId === t.id;
+    let status = dur ? fmt(dur) : '';
+    if (st === 'wip') status = dur ? `${fmt(dur - p.position)} restant` : fmt(p.position);
+    if (st === 'done') status = 'Écouté ✓';
+    const pct = st === 'done' ? 100 : (st === 'wip' && dur ? Math.min(100, p.position / dur * 100) : 0);
+    return `
+      <li class="track ${cur ? 'current' : ''}" data-id="${esc(t.id)}">
+        <button class="t-play" aria-label="${cur && playing ? 'Pause' : 'Lire'} ${esc(t.title)}">
+          <svg viewBox="0 0 24 24">${cur && playing ? ICON_PAUSE : ICON_PLAY}</svg>
+        </button>
+        <div class="t-body">
+          ${(t.domaine || t.podcast) ? `<div class="t-kicker">${t.domaine ? `<span class="${t.domaine === 'CAC' ? 'cac' : 'ec'}">${esc(t.domaine)}</span>` : ''}${t.domaine && t.podcast ? ' · ' : ''}${highlight(t.podcast)}</div>` : ''}
+          <div class="t-title">${highlight(t.title)}</div>
+          ${t.description ? `<div class="t-desc">${highlight(t.description)}</div>` : ''}
+          <div class="t-meta">
+            ${t.keywords.length ? `<span class="t-kw">${t.keywords.map(k => '#' + highlight(k)).join(' ')}</span>` : ''}
+            <span class="t-status ${st}">${status}</span>
+          </div>
+          ${pct ? `<div class="bar ${st === 'done' ? 'done' : ''}"><i style="width:${pct.toFixed(1)}%"></i></div>` : ''}
+          ${st !== 'new' ? `<button class="btn ghost" data-restart style="margin-top:6px;margin-left:-4px;font-size:10px;">↺ Recommencer</button>` : ''}
+        </div>
+      </li>`;
+  }).join('');
+}
+
+// ============================================================
+// LECTEUR
+// ============================================================
+const P = {
+  el: document.getElementById('player'),
+  title: document.getElementById('p-title'),
+  seek: document.getElementById('p-seek'),
+  cur: document.getElementById('p-cur'),
+  left: document.getElementById('p-left'),
+  play: document.getElementById('p-play'),
+  icon: document.getElementById('p-play-icon'),
+  speed: document.getElementById('p-speed'),
+  err: document.getElementById('p-err'),
+};
+let seeking = false;
+let lastSaveAt = 0;
+
+function showPlayer(show) {
+  P.el.hidden = !show;
+  requestAnimationFrame(() => {
+    document.documentElement.style.setProperty('--player-h', show ? P.el.offsetHeight + 'px' : '0px');
+  });
+}
+
+async function playTrack(id, opts = {}) {
+  const t = trackById(id); if (!t) return;
+  let src = Urls.fresh() ? Urls.get(id) : null;
+  if (!src) {
+    // Cas rare (liens expirés ou piste ajoutée depuis la connexion) : on redemande
+    P.title.textContent = 'Chargement…'; showPlayer(true);
+    try { await Urls.refresh(); } catch (e) { console.warn(e); }
+    src = Urls.get(id);
+    if (!src) {
+      P.title.textContent = t.title; P.err.hidden = false;
+      P.err.textContent = 'Lien audio indisponible. Vérifie ta connexion puis réessaie.';
+      return;
+    }
+  }
+  if (State.currentId && State.currentId !== id) saveNow();
+  State.currentId = id;
+  P.err.hidden = true;
+  P.title.textContent = t.title;
+  showPlayer(true);
+
+  const p = State.progress[id];
+  const startAt = opts.startAt != null ? opts.startAt : (p && !p.completed ? (p.position || 0) : 0);
+  retried = opts.isRetry ? retried : false;
+  audio.src = src;
+  audio.playbackRate = lsGet('speed', 1);
+  audio.defaultPlaybackRate = audio.playbackRate;
+
+  const onMeta = () => {
+    audio.removeEventListener('loadedmetadata', onMeta);
+    if (startAt > 0 && startAt < audio.duration - 2) audio.currentTime = startAt;
+    Progress.set(id, { duration: audio.duration });
+    updateTime();
+  };
+  audio.addEventListener('loadedmetadata', onMeta);
+  wantPlay = opts.autoplay !== false;
+  if (wantPlay) audio.play().catch(err => { if (err.name !== 'AbortError') console.warn(err); });
+
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({ title: t.title, artist: t.podcast || 'DEC-ouverte', album: 'DEC-ouverte · Audiothèque' });
+  }
+  lsSet('last', id);
+  renderList();
+}
+
+function togglePlay() {
+  if (!audio.src) return;
+  audio.paused ? audio.play().catch(() => {}) : audio.pause();
+}
+
+function saveNow(pushNow = true) {
+  const id = State.currentId;
+  if (!id || !audio.src || !isFinite(audio.duration)) return Promise.resolve();
+  const pos = audio.currentTime;
+  const dur = audio.duration;
+  const completed = audio.ended || (dur - pos) <= DONE_MARGIN;
+  const prev = State.progress[id];
+  Progress.set(id, {
+    position: completed ? 0 : pos,
+    duration: dur,
+    // une fois écouté, reste "écouté" sauf si on recommence manuellement
+    completed: completed || !!(prev && prev.completed && pos < 1),
+  });
+  lastSaveAt = Date.now();
+  return pushNow ? Progress.push(id) : Promise.resolve();
+}
+
+function updateTime() {
+  const d = audio.duration, c = audio.currentTime;
+  if (!seeking) {
+    P.seek.max = isFinite(d) ? d : 100;
+    P.seek.value = c;
+  }
+  const pct = isFinite(d) && d ? (P.seek.value / d * 100) : 0;
+  P.seek.style.setProperty('--pct', pct + '%');
+  P.cur.textContent = fmt(seeking ? P.seek.value : c);
+  P.left.textContent = isFinite(d) ? '-' + fmt(d - (seeking ? P.seek.value : c)) : '';
+}
+
+function setPlayIcon() {
+  P.icon.innerHTML = audio.paused ? ICON_PLAY : ICON_PAUSE;
+  P.play.setAttribute('aria-label', audio.paused ? 'Lecture' : 'Pause');
+  if ('mediaSession' in navigator) navigator.mediaSession.playbackState = audio.paused ? 'paused' : 'playing';
+}
+
+function skip(sec) {
+  if (!audio.src) return;
+  audio.currentTime = Math.max(0, Math.min((audio.duration || 0) - 0.5, audio.currentTime + sec));
+}
+
+audio.addEventListener('timeupdate', () => {
+  updateTime();
+  if (!audio.paused && Date.now() - lastSaveAt > SAVE_EVERY_MS) saveNow();
+  if ('mediaSession' in navigator && isFinite(audio.duration) && navigator.mediaSession.setPositionState) {
+    try { navigator.mediaSession.setPositionState({ duration: audio.duration, position: audio.currentTime, playbackRate: audio.playbackRate }); } catch (e) {}
+  }
+});
+audio.addEventListener('play', () => { setPlayIcon(); renderList(); });
+audio.addEventListener('pause', () => { if (!audio.error) wantPlay = false; setPlayIcon(); saveNow(); renderList(); });
+audio.addEventListener('seeked', () => saveNow());
+audio.addEventListener('ended', () => { saveNow(); setPlayIcon(); renderList(); });
+// En cas d'erreur (ex. lien expiré pendant une longue pause) : on renouvelle les liens
+// et on reprend au même endroit, une seule fois ; ensuite on affiche l'erreur.
+let retried = false;
+let wantPlay = false;   // l'utilisateur a demandé la lecture (sert à relancer après renouvellement du lien)
+audio.addEventListener('error', async () => {
+  const id = State.currentId;
+  if (!audio.getAttribute('src') || !id) return;
+  if (!retried) {
+    retried = true;
+    const pos = audio.currentTime || (State.progress[id] && State.progress[id].position) || 0;
+    const wasPlaying = !audio.paused || wantPlay;
+    try { await Urls.refresh(); } catch (e) {}
+    return playTrack(id, { startAt: pos, autoplay: wasPlaying, isRetry: true });
+  }
+  P.err.hidden = false;
+  P.err.textContent = 'Impossible de lire ce fichier. Vérifie que la colonne « fichier » correspond exactement au nom du fichier dans le bucket R2.';
+});
+
+P.play.onclick = togglePlay;
+document.getElementById('p-back').onclick = () => skip(-15);
+document.getElementById('p-fwd').onclick = () => skip(30);
+document.getElementById('p-close').onclick = () => {
+  saveNow(); audio.pause(); audio.removeAttribute('src'); audio.load();
+  State.currentId = null; showPlayer(false); renderList();
+};
+P.speed.onclick = () => {
+  const i = (SPEEDS.indexOf(audio.playbackRate) + 1) % SPEEDS.length;
+  audio.playbackRate = SPEEDS[i];
+  lsSet('speed', SPEEDS[i]);
+  P.speed.textContent = String(SPEEDS[i]).replace('.', ',') + '×';
+};
+P.speed.textContent = String(lsGet('speed', 1)).replace('.', ',') + '×';
+P.seek.addEventListener('input', () => { seeking = true; updateTime(); });
+P.seek.addEventListener('change', () => { seeking = false; audio.currentTime = Number(P.seek.value); });
+
+if ('mediaSession' in navigator) {
+  const ms = navigator.mediaSession;
+  const h = (a, f) => { try { ms.setActionHandler(a, f); } catch (e) {} };
+  h('play', () => audio.play());
+  h('pause', () => audio.pause());
+  h('seekbackward', d => skip(-(d.seekOffset || 15)));
+  h('seekforward', d => skip(d.seekOffset || 30));
+  h('seekto', d => { audio.currentTime = d.seekTime; });
+}
+
+// Espace = lecture/pause (hors champs de saisie)
+document.addEventListener('keydown', e => {
+  if (e.code !== 'Space' || State.view !== 'library' || !audio.src) return;
+  if (/INPUT|TEXTAREA|BUTTON/.test(document.activeElement.tagName)) return;
+  e.preventDefault(); togglePlay();
+});
+
+// Sauvegarde en quittant / en passant en arrière-plan (localStorage garanti, Supabase si possible)
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveNow(); });
+window.addEventListener('pagehide', () => saveNow());
+
+// ============================================================
+// NAVIGATION & DÉMARRAGE
+// ============================================================
+function render(v) {
+  State.view = v;
+  if (v === 'auth') renderAuth();
+  else if (v === 'recovery') renderRecovery();
+  else if (v === 'library') renderLibrary();
+  else view().innerHTML = `
+    <div class="splash">
+      <div class="splash-kicker">DEC-ouverte</div>
+      <div class="splash-title">Audio<em>thèque</em></div>
+      <div class="splash-dot"></div>
+    </div>`;
+}
+
+async function onSignedIn(session) {
+  State.user = { id: session.user.id, email: session.user.email };
+  render('splash');
+  try {
+    await Promise.all([loadCatalog(), Progress.load()]);
+    await Urls.refresh().catch(e => console.warn('Liens audio indisponibles pour le moment', e));
+  } catch (e) {
+    console.error(e);
+    view().innerHTML = `<div class="empty" style="padding-top:80px;"><h2>Erreur de chargement</h2>${esc(e.message)}</div>`;
+    return;
+  }
+  render('library');
+  // Prépare le dernier titre écouté (sans lancer la lecture — les navigateurs l'interdisent sans clic)
+  const lastId = lsGet('last', null);
+  const t = lastId && trackById(lastId);
+  const p = t && State.progress[t.id];
+  if (t && p && !p.completed && p.position > 1 && Urls.get(t.id)) {
+    playTrack(t.id, { autoplay: false });
+    setPlayIcon();
+  }
+}
+
+function onSignedOut() {
+  audio.pause(); audio.removeAttribute('src'); audio.load();
+  showPlayer(false);
+  Urls.clear();
+  Object.assign(State, { user: null, progress: {}, currentId: null, authMode: 'signin', authError: null, authInfo: null });
+  render('auth');
+}
+
+async function init() {
+  if (!sb) {
+    view().innerHTML = `<div class="empty" style="padding-top:80px;"><h2>Erreur de chargement</h2>La bibliothèque Supabase n'a pas pu être chargée. Recharge la page.</div>`;
+    return;
+  }
+  render('splash');
+  let recovering = /type=recovery/.test(location.hash);
+
+  sb.auth.onAuthStateChange((event, session) => {
+    // setTimeout : évite de faire des requêtes Supabase à l'intérieur du callback (deadlock connu)
+    setTimeout(() => {
+      if (event === 'PASSWORD_RECOVERY') { recovering = true; render('recovery'); }
+      else if (event === 'SIGNED_IN' && session && !recovering && (!State.user || State.user.id !== session.user.id)) onSignedIn(session);
+      else if (event === 'SIGNED_OUT') onSignedOut();
+    }, 0);
+  });
+
+  const { data } = await sb.auth.getSession();
+  if (recovering) return render('recovery');
+  if (data && data.session) onSignedIn(data.session);
+  else render('auth');
+}
+
+init();
+})();
+</script>
+</body>
+</html>
