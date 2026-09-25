@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#faf6f0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Audiothèque">
+<meta name="apple-mobile-web-app-title" content="Audio-DEC">
 <meta name="robots" content="noindex">
-<title>DEC-ouverte — Audiothèque</title>
+<title>DEC-ouverte — Audio-DEC</title>
 <style>
 /* =============================================================
    RESET & TOKENS — même palette que l'app flashcards
@@ -514,7 +514,7 @@ function renderAuth() {
         <a href="https://www.dec-ouverte.fr" target="_blank" rel="noopener" class="auth-logo-link">DEC-<em>ouverte</em></a>
       </div>
       <div class="masthead">
-        <div class="kicker">DEC · Audiothèque</div>
+        <div class="kicker">DEC · Audio-DEC</div>
         <h1>Écouter<br>& <em>réviser</em></h1>
         <p>Tes contenus audio, où que tu sois. Reprends là où tu t'es arrêté.</p>
       </div>
@@ -669,7 +669,7 @@ function renderLibrary() {
   const email = State.user ? State.user.email : '';
   view().innerHTML = `
     <div class="topbar">
-      <div class="brand">Audio<em>thèque</em></div>
+      <div class="brand">Audio<em>DEC</em></div>
       <span class="who" title="${esc(email)}">${esc(email)}</span>
       <button class="btn ghost" id="logout">Quitter</button>
     </div>
@@ -873,7 +873,7 @@ async function playTrack(id, opts = {}) {
   if (wantPlay) audio.play().catch(err => { if (err.name !== 'AbortError') console.warn(err); });
 
   if ('mediaSession' in navigator) {
-    navigator.mediaSession.metadata = new MediaMetadata({ title: t.title, artist: t.podcast || 'DEC-ouverte', album: 'DEC-ouverte · Audiothèque' });
+    navigator.mediaSession.metadata = new MediaMetadata({ title: t.title, artist: t.podcast || 'DEC-ouverte', album: 'DEC-ouverte · Audio-DEC' });
   }
   lsSet('last', id);
   renderList();
@@ -1002,7 +1002,7 @@ function render(v) {
   else view().innerHTML = `
     <div class="splash">
       <div class="splash-kicker">DEC-ouverte</div>
-      <div class="splash-title">Audio<em>thèque</em></div>
+      <div class="splash-title">Audio<em>DEC</em></div>
       <div class="splash-dot"></div>
     </div>`;
 }
