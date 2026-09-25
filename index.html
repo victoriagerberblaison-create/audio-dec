@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#faf6f0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Audiothèque">
+<meta name="apple-mobile-web-app-title" content="AudioDEC">
 <meta name="robots" content="noindex">
-<title>DEC-ouverte — Audiothèque</title>
+<title>DEC-ouverte — AudioDEC</title>
 <style>
 /* =============================================================
    RESET & TOKENS — même palette que l'app flashcards
@@ -114,7 +114,7 @@ p { margin: 0 0 1em; }
 .footer a { color: inherit; }
 
 /* =============================================================
-   BIBLIOTHÈQUE
+   BIBLIODEC
    ============================================================= */
 .topbar {
   position: sticky; top: 0; z-index: 10; background: rgba(250,246,240,.92);
@@ -530,7 +530,7 @@ function showPaywall(track = null) {
   box.innerHTML = `
     <div class="pw-card">
       <div class="kicker">${track ? 'Réservé aux abonnés' : 'Abonnement annuel'}</div>
-      <h2 id="pw-title">Débloque<br>toute l'<em>audiothèque</em></h2>
+      <h2 id="pw-title">Débloque<br>toute l'<em>audioDEC</em></h2>
       <p>${track
         ? `« ${esc(track.title)} » fait partie des épisodes réservés aux abonnés.`
         : `L'abonnement annuel te donne accès à tous les épisodes.`}</p>
@@ -702,7 +702,7 @@ function renderAuth() {
         <a href="https://www.dec-ouverte.fr" target="_blank" rel="noopener" class="auth-logo-link">DEC-<em>ouverte</em></a>
       </div>
       <div class="masthead">
-        <div class="kicker">DEC · Audiothèque</div>
+        <div class="kicker">DEC · AudioDEC</div>
         <h1>Écouter<br>& <em>réviser</em></h1>
         <p>Tes contenus audio, où que tu sois. Reprends là où tu t'es arrêté.</p>
       </div>
@@ -834,7 +834,7 @@ function renderRecovery() {
 }
 
 // ============================================================
-// BIBLIOTHÈQUE
+// BIBLIODEC
 // ============================================================
 function statusOf(t) {
   const p = State.progress[t.id];
@@ -899,14 +899,14 @@ function renderLibrary() {
   const email = State.user ? State.user.email : '';
   view().innerHTML = `
     <div class="topbar">
-      <div class="brand">Audio<em>thèque</em></div>
+      <div class="brand">Audio<em>DEC</em></div>
       <span class="who" title="${esc(email)}">${esc(email)}</span>
       <button class="btn ghost" id="logout">Quitter</button>
     </div>
     <div class="lib">
       <div class="lib-head">
         <div class="kicker">DEC-ouverte · ${State.tracks.length} titre${State.tracks.length > 1 ? 's' : ''}</div>
-        <h1>Bibliothèque</h1>
+        <h1>BiblioDEC</h1>
       </div>
       <div id="quota" class="quota"></div>
       <div id="resume-slot"></div>
@@ -1111,7 +1111,7 @@ async function playTrack(id, opts = {}) {
   if (wantPlay) audio.play().catch(err => { if (err.name !== 'AbortError') console.warn(err); });
 
   if ('mediaSession' in navigator) {
-    navigator.mediaSession.metadata = new MediaMetadata({ title: t.title, artist: t.podcast || 'DEC-ouverte', album: 'DEC-ouverte · Audiothèque' });
+    navigator.mediaSession.metadata = new MediaMetadata({ title: t.title, artist: t.podcast || 'DEC-ouverte', album: 'DEC-ouverte · AudioDEC' });
   }
   lsSet('last', id);
   renderList();
@@ -1246,7 +1246,7 @@ function render(v) {
   else view().innerHTML = `
     <div class="splash">
       <div class="splash-kicker">DEC-ouverte</div>
-      <div class="splash-title">Audio<em>thèque</em></div>
+      <div class="splash-title">Audio<em>DEC</em></div>
       <div class="splash-dot"></div>
     </div>`;
 }
@@ -1285,7 +1285,7 @@ function onSignedOut() {
 
 async function init() {
   if (!sb) {
-    view().innerHTML = `<div class="empty" style="padding-top:80px;"><h2>Erreur de chargement</h2>La bibliothèque Supabase n'a pas pu être chargée. Recharge la page.</div>`;
+    view().innerHTML = `<div class="empty" style="padding-top:80px;"><h2>Erreur de chargement</h2>La biblioDEC Supabase n'a pas pu être chargée. Recharge la page.</div>`;
     return;
   }
   render('splash');
