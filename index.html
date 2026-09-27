@@ -159,7 +159,7 @@ p { margin: 0 0 1em; }
 .chip.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 
 .seg { display: flex; border-bottom: 1px solid var(--rule); margin-bottom: 8px; }
-.seg button { flex: 1; padding: 12px 4px; font-family: var(--font-mono); font-size: 10px; letter-spacing: .16em;
+.seg button { flex: 1; padding: 12px 2px; font-family: var(--font-mono); font-size: 10px; letter-spacing: .08em; white-space: nowrap;
   text-transform: uppercase; color: var(--ink-mute); border-bottom: 2px solid transparent; margin-bottom: -1px; }
 .seg button.on { color: var(--ink); border-bottom-color: var(--ec); }
 
@@ -199,10 +199,15 @@ p { margin: 0 0 1em; }
 .track.locked .t-title, .track.locked .t-desc, .track.locked .t-kicker, .track.locked .t-kw { opacity: .5; }
 .track.locked .t-play { background: var(--bg-deep); border-style: dashed; color: var(--ink-mute); }
 .track .t-play svg.i-lock { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; width: 16px; height: 16px; }
-.t-badge { font-family: var(--font-mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase;
-  padding: 3px 7px; border-radius: 999px; white-space: nowrap; }
-.t-badge.lock { color: var(--ink-soft); border: 1px solid var(--rule); background: var(--paper); }
-.t-badge.free { color: var(--ok); border: 1px solid var(--cac-soft); background: rgba(45,74,47,.06); }
+.t-lock { display: inline-flex; color: var(--ink-mute); }
+.t-lock svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+.t-fav { width: 40px; height: 40px; margin: 0 -8px 0 -6px; display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0; color: var(--ink-mute); border-radius: 50%; }
+.t-fav:active { background: var(--rule-soft); }
+.t-fav svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linejoin: round; transition: transform .15s; }
+.t-fav.on { color: var(--ec); }
+.t-fav.on svg { fill: currentColor; }
+.t-fav.on:active svg { transform: scale(.85); }
 .dom button[data-d="free"].on { background: var(--ok); }
 .track .t-kicker { font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 3px; }
 .track .t-kicker .ec { color: var(--ec); }
@@ -275,7 +280,46 @@ body.no-scroll { overflow: hidden; }
 .pw-list { margin: 0 0 18px; font-size: 14px; color: var(--ink); }
 .pw-list li { padding: 7px 0 7px 22px; border-top: 1px solid var(--rule-soft); position: relative; }
 .pw-list li::before { content: '✓'; position: absolute; left: 2px; color: var(--ok); }
-.pw-price { font-family: var(--font-display); font-size: 26px; margin: 4px 0 16px; }
+.pw-price { font-family: var(--font-display); font-size: 30px; line-height: 1.1; margin: 4px 0 4px; }
+.pw-price-sub { font-size: 12px; color: var(--ink-mute); line-height: 1.45; margin-bottom: 18px; }
+.pw-box { border: 1px solid var(--rule); border-radius: var(--radius-m); background: var(--paper); padding: 14px 16px; margin-bottom: 12px; }
+.pw-box h3 { font-family: var(--font-mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; margin: 0 0 8px; }
+.pw-box ul { font-size: 13px; color: var(--ink); line-height: 1.45; }
+.pw-box li { padding: 4px 0 4px 14px; position: relative; }
+.pw-box li::before { content: '·'; position: absolute; left: 3px; color: var(--ink-mute); font-weight: 700; }
+.pw-box p { font-size: 13px; color: var(--ink); line-height: 1.5; margin: 0; }
+.pw-box a, .pw-foot a { color: inherit; text-underline-offset: 2px; }
+.pw-box.warn { border-left: 3px solid var(--ec); }
+.pw-actions { margin-top: 14px; }
+.news-ask { background: var(--paper); border: 1px solid var(--rule); border-left: 3px solid var(--ec); border-radius: var(--radius-m); padding: 14px 16px; margin-bottom: 20px; }
+.news-ask p { font-size: 14px; color: var(--ink); margin: 0 0 12px; line-height: 1.45; }
+.news-ask .na-btns { display: flex; gap: 8px; }
+.news-ask .btn { min-height: 40px; font-size: 14px; padding: 0 12px; }
+.lib-foot { margin-top: 36px; padding-top: 18px; border-top: 1px dotted var(--rule); font-size: 11px; color: var(--ink-mute); text-align: center; }
+.lib-foot .news-toggle { display: flex; gap: 10px; align-items: center; justify-content: center; font-size: 13px; color: var(--ink); margin-bottom: 14px; cursor: pointer; }
+.lib-foot .news-toggle input { width: 18px; height: 18px; accent-color: var(--ec); -webkit-appearance: checkbox; appearance: auto; }
+.lib-foot .links { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; font-size: 12px; color: var(--ink-soft); }
+.lib-foot .links button, .lib-foot .links a { text-decoration: underline; text-underline-offset: 2px; color: inherit; font-size: inherit; }
+.pw-consent { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.pw-consent label { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; line-height: 1.45; color: var(--ink); cursor: pointer; }
+.pw-consent input { width: 18px; height: 18px; margin: 1px 0 0; flex-shrink: 0; accent-color: var(--ec); -webkit-appearance: checkbox; appearance: auto; }
+.inline-link { text-decoration: underline; text-underline-offset: 2px; color: inherit; font-size: inherit; }
+.btn.is-off { opacity: .4; }
+.legal ul { list-style: disc; padding-left: 20px; margin: 0 0 8px; }
+.legal li { font-size: 13.5px; color: var(--ink-soft); line-height: 1.5; margin-bottom: 4px; }
+.legal p + p { margin-top: 8px; }
+.legal .version { font-size: 12px; color: var(--ink-mute); margin: 6px 0 4px; }
+.legal strong { color: var(--ink); font-weight: 600; }
+.legal a { color: inherit; }
+.pw-foot { margin-top: 18px; padding-top: 14px; border-top: 1px dotted var(--rule); font-size: 11px; color: var(--ink-mute); line-height: 1.55; text-align: center; }
+.pw-foot .links { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; font-size: 12px; color: var(--ink-soft); }
+.pw-foot .links button { text-decoration: underline; text-underline-offset: 2px; color: inherit; font-size: inherit; }
+.legal { z-index: 250; }
+.legal .pw-card { max-width: 520px; position: relative; }
+.legal h2 { font-size: 26px; }
+.legal h3 { font-family: var(--font-body); font-size: 14px; font-weight: 600; margin: 18px 0 6px; }
+.legal p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.55; margin: 0; }
+.legal .hl { background: var(--ec-soft); border-radius: 4px; transition: background 1.2s; }
 .btn.warm { background: var(--ec); color: var(--bg); text-decoration: none; }
 .pw-msg { font-size: 13px; color: var(--ink-soft); margin-top: 12px; text-align: center; }
 .toast { position: fixed; left: 50%; top: 16px; transform: translateX(-50%); z-index: 300; background: var(--ink); color: var(--bg);
@@ -287,6 +331,10 @@ body.no-scroll { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
 <script src="vendor/supabase.js"></script>
+<script>
+  // Secours : si vendor/supabase.js est absent (fichier ouvert seul, dossier non copié), on charge la bibliothèque depuis le CDN
+  if (!window.supabase) document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"><\/script>');
+</script>
 </head>
 <body>
 <div id="app"><div id="view"></div></div>
@@ -344,10 +392,19 @@ const SPEEDS = [1, 1.25, 1.5, 1.75, 2, 0.75];
 
 // ABONNEMENT — à compléter quand l'offre Stripe est prête
 const PAYWALL = {
-  price: 'XX € / an',        // prix affiché dans la fenêtre
+  price: '9,99 €',           // prix affiché dans la fenêtre
   paymentLink: '',           // lien de paiement Stripe (https://buy.stripe.com/…). Vide = bouton « Bientôt disponible »
   portalLink: '',            // facultatif : lien du portail client Stripe (gérer / résilier l'abonnement)
 };
+const FAVORITES_TABLE = 'audio_favorites';   // table Supabase des favoris (« Ma liste »). Absente = favoris gardés sur l'appareil
+
+const LEGAL = {
+  seller: 'DEC-ouverte, 12 rue de la Tuilerie, 67980 Hangenbieten',
+  siren: '106175235',
+  email: 'contact@dec-ouverte.fr',
+};
+const CGV_URL = 'cgv.html';                   // pages annexes chargées dans la fenêtre d'abonnement
+const PRIVACY_URL = 'confidentialite.html';   // (les deux fichiers doivent être à côté d'index.html)
 
 // ============================================================
 // SUPABASE
@@ -371,12 +428,11 @@ const State = {
   tracks: [],
   progress: {},              // { [trackId]: { position, duration, completed, updated_at } }
   query: '',
-  keywords: new Set(),
-  domaine: 'all',          // all | EC | CAC
-  podcast: '',             // '' = tous
-  showAllTags: false,
+  tag: '',                 // hashtag sélectionné ('' = tous)
+  domaine: 'all',          // all | EC | CAC | free
   account: null,           // { listened_seconds, free_seconds, remaining_seconds, subscribed, period_end }
-  status: 'all',             // all | wip | new | done
+  favorites: new Set(),    // ids des titres cochés ♥
+  status: 'all',             // all | wip | new | done | fav
   currentId: null,
 };
 
@@ -402,6 +458,7 @@ function lsSet(k, v) { try { localStorage.setItem(LS + k, JSON.stringify(v)); } 
 const ICON_PLAY = '<path d="M7 4.5v15l13-7.5z"/>';
 const ICON_PAUSE = '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
 const ICON_LOCK = '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>';
+const ICON_HEART = '<path d="M12 20.5s-7.5-4.6-9.2-9.4C1.6 7.7 3.8 4.5 7.2 4.5c2 0 3.6 1.1 4.8 2.8 1.2-1.7 2.8-2.8 4.8-2.8 3.4 0 5.6 3.2 4.4 6.6-1.7 4.8-9.2 9.4-9.2 9.4z"/>';
 
 // ============================================================
 // CATALOGUE — table Supabase `audio_tracks`
@@ -540,16 +597,66 @@ function showPaywall(track = null) {
         <li>Reprise là où tu t'es arrêté, sur tous tes appareils</li>
       </ul>
       <div class="pw-price">${esc(PAYWALL.price)}</div>
-      ${url
-        ? `<a class="btn warm" href="${esc(url)}" id="pw-buy">S'abonner</a>`
-        : `<button class="btn" disabled>Bientôt disponible</button>`}
-      <button type="button" class="btn secondary" id="pw-check" style="margin-top:10px;">J'ai déjà payé · actualiser</button>
-      <button type="button" class="btn ghost" id="pw-close" style="margin:14px auto 0;display:block;">Plus tard</button>
-      <div class="pw-msg" id="pw-msg" hidden></div>
+      <div class="pw-price-sub">Abonnement annuel · sans reconduction automatique · TVA non applicable, art. 293 B du CGI</div>
+
+      <div class="pw-box">
+        <h3>Conditions essentielles</h3>
+        <ul>
+          <li>Accès valable 1 an à compter de la date de souscription</li>
+          <li>Pas de renouvellement automatique : il faut souscrire à nouveau à l'échéance</li>
+          <li>Résiliation par email à <a href="mailto:${LEGAL.email}">${LEGAL.email}</a>, avec effet immédiat et sans remboursement</li>
+          <li>Usage personnel uniquement : l'accès est nominatif et ne peut pas être partagé</li>
+          <li>Prérequis : connexion internet, navigateur récent (Chrome, Safari, Firefox)</li>
+        </ul>
+      </div>
+      <div class="pw-box warn">
+        <h3>Droit de rétractation</h3>
+        <p>Conformément à l'art. L.221-28 13° du Code de la consommation, en souscrivant vous demandez l'exécution immédiate du service et renoncez au délai de rétractation de 14 jours dès l'activation de l'accès.</p>
+      </div>
+
+      <div class="pw-consent">
+        <label><input type="checkbox" id="pw-c-cgv"> <span>J'ai lu et j'accepte les <button type="button" class="inline-link" id="pw-cgv-inline">Conditions Générales de Vente</button>.</span></label>
+        <label><input type="checkbox" id="pw-c-retract"> <span>Je demande l'accès immédiat à tous les épisodes et je reconnais perdre mon droit de rétractation de 14 jours dès l'activation de l'accès.</span></label>
+      </div>
+
+      <div class="pw-actions">
+        ${url
+          ? `<a class="btn warm is-off" href="${esc(url)}" id="pw-buy" aria-disabled="true">S'abonner</a>`
+          : `<button class="btn" disabled>Bientôt disponible</button>`}
+        <button type="button" class="btn secondary" id="pw-check" style="margin-top:10px;">J'ai déjà payé · actualiser</button>
+        <button type="button" class="btn ghost" id="pw-close" style="margin:14px auto 0;display:block;">Plus tard</button>
+        <div class="pw-msg" id="pw-msg" hidden></div>
+      </div>
+
+      <div class="pw-foot">
+        <div class="links">
+          <button type="button" id="pw-cgv">Lire les CGV complètes</button>
+          <button type="button" id="pw-privacy">Politique de confidentialité</button>
+        </div>
+        ${esc(LEGAL.seller)} · SIREN : ${esc(LEGAL.siren)} · <a href="mailto:${LEGAL.email}">${LEGAL.email}</a>
+      </div>
     </div>`;
   document.body.appendChild(box);
   document.body.classList.add('no-scroll');
   box.querySelector('#pw-close').onclick = closePaywall;
+  box.querySelector('#pw-cgv').onclick = () => showCGV();
+  box.querySelector('#pw-cgv-inline').onclick = e => { e.preventDefault(); showCGV(); };
+  // Le bouton S'abonner n'est actif qu'après les deux accords exprès (CGV + renonciation à la rétractation)
+  const cCgv = box.querySelector('#pw-c-cgv'), cRet = box.querySelector('#pw-c-retract'), buy = box.querySelector('#pw-buy');
+  const syncBuy = () => {
+    if (!buy) return;
+    const ok = cCgv.checked && cRet.checked;
+    buy.classList.toggle('is-off', !ok);
+    buy.setAttribute('aria-disabled', String(!ok));
+  };
+  cCgv.onchange = cRet.onchange = syncBuy;
+  if (buy) buy.addEventListener('click', e => {
+    if (cCgv.checked && cRet.checked) return;
+    e.preventDefault();
+    const msg = box.querySelector('#pw-msg');
+    msg.hidden = false; msg.textContent = 'Coche les deux cases ci-dessus pour continuer.';
+  });
+  box.querySelector('#pw-privacy').onclick = () => showPrivacy();
   box.addEventListener('click', e => { if (e.target === box) closePaywall(); });
   box.querySelector('#pw-check').onclick = async () => {
     const msg = box.querySelector('#pw-msg');
@@ -563,15 +670,92 @@ function showPaywall(track = null) {
       msg.textContent = 'Aucun abonnement trouvé pour ce compte pour l\'instant. Si tu viens de payer, réessaie dans quelques secondes.';
     }
   };
-  const first = box.querySelector('#pw-buy') || box.querySelector('#pw-check');
-  if (first) first.focus();
+  cCgv.focus({ preventScroll: true });
 }
 function closePaywall() {
+  closeCGV();
   const el = document.getElementById('paywall');
   if (el) el.remove();
   document.body.classList.remove('no-scroll');
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closePaywall(); });
+
+// Pages légales annexes (CGV, Politique de confidentialité), affichées dans une fenêtre par-dessus l'abonnement
+const LEGAL_PAGES = {
+  cgv:     { url: CGV_URL,     title: 'Conditions Générales de Vente' },
+  privacy: { url: PRIVACY_URL, title: 'Politique de confidentialité' },
+};
+function showCGV(anchor) { showLegal('cgv', anchor); }
+function showPrivacy(anchor) { showLegal('privacy', anchor); }
+function showLegal(key, anchor) {
+  const page = LEGAL_PAGES[key];
+  closeCGV();
+  const box = document.createElement('div');
+  box.className = 'paywall legal';
+  box.id = 'cgv';   // une seule fenêtre légale à la fois
+  box.setAttribute('role', 'dialog');
+  box.setAttribute('aria-modal', 'true');
+  box.setAttribute('aria-label', page.title);
+  box.innerHTML = `
+    <div class="pw-card">
+      <div id="cgv-body"><p class="pw-msg">Chargement…</p></div>
+      <a class="btn secondary" href="${esc(page.url)}" target="_blank" rel="noopener" style="margin-top:22px;text-decoration:none;">Ouvrir dans un onglet · imprimer</a>
+      <button type="button" class="btn" id="cgv-close" style="margin-top:10px;">Fermer</button>
+    </div>`;
+  document.body.appendChild(box);
+  document.body.classList.add('no-scroll');
+  box.querySelector('#cgv-close').onclick = closeCGV;
+  box.addEventListener('click', e => {
+    if (e.target === box) return closeCGV();
+    // lien d'une page légale vers l'autre (ex. CGV → Politique de confidentialité) : on reste dans la fenêtre
+    const a = e.target.closest('#cgv-body a[href]'); if (!a) return;
+    const href = a.getAttribute('href').split('#');
+    const other = Object.keys(LEGAL_PAGES).find(k => LEGAL_PAGES[k].url === href[0]);
+    if (other) { e.preventDefault(); showLegal(other, href[1]); }
+  });
+  box.querySelector('#cgv-close').focus({ preventScroll: true });
+
+  loadLegal(page.url).then(html => {
+    if (!document.body.contains(box)) return;
+    box.querySelector('#cgv-body').innerHTML = html;
+    if (anchor) {
+      const sec = box.querySelector('#' + CSS.escape(anchor));
+      if (sec) {
+        box.querySelector('.pw-card').scrollTop = sec.offsetTop - 16;
+        sec.classList.add('hl');
+        setTimeout(() => sec.classList.remove('hl'), 1500);
+      }
+    }
+  }).catch(e => {
+    console.warn('Page légale indisponible', page.url, e);
+    if (!document.body.contains(box)) return;
+    box.querySelector('#cgv-body').innerHTML = `
+      <h2>${esc(page.title)}</h2>
+      <p>Cette page n'a pas pu être affichée ici. Ouvre-la dans un nouvel onglet avec le bouton ci-dessous.</p>`;
+  });
+}
+// Récupère le contenu (<main>) d'une page légale, une seule fois par session
+const legalCache = {};
+async function loadLegal(url) {
+  if (legalCache[url]) return legalCache[url];
+  const res = await fetch(url, { cache: 'no-cache' });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
+  const main = doc.querySelector('main');
+  if (!main) throw new Error('<main> introuvable dans ' + url);
+  main.querySelectorAll('script, .print').forEach(n => n.remove());
+  main.querySelectorAll('h1').forEach(h => { const h2 = document.createElement('h2'); h2.innerHTML = h.innerHTML; h.replaceWith(h2); });
+  main.querySelectorAll('section h2').forEach(h => { const h3 = document.createElement('h3'); h3.innerHTML = h.innerHTML; h.replaceWith(h3); });
+  return (legalCache[url] = main.innerHTML);
+}
+function closeCGV() {
+  const el = document.getElementById('cgv');
+  if (el) el.remove();
+  if (!document.getElementById('paywall')) document.body.classList.remove('no-scroll');
+}
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (document.getElementById('cgv')) closeCGV(); else closePaywall();
+});
 
 // Retour depuis Stripe (?abonnement=ok) : on attend que le webhook ait activé l'abonnement
 async function handleStripeReturn() {
@@ -669,6 +853,70 @@ const Progress = {
   }
 };
 
+// ============================================================
+// FAVORIS (« Ma liste ») — Supabase si la table existe + cache local
+// ============================================================
+const Favs = {
+  remote: false,
+  key() { return 'favs:' + (State.user ? State.user.id : 'anon'); },
+  save() { lsSet(this.key(), [...State.favorites]); },
+
+  async load() {
+    const local = new Set(lsGet(this.key(), []).map(String));
+    State.favorites = new Set(local);
+    this.remote = false;
+    try {
+      const { data, error } = await sb.from(FAVORITES_TABLE).select('track_id');
+      if (error) throw error;
+      this.remote = true;
+      const remote = new Set((data || []).map(r => String(r.track_id)));
+      // on remonte les favoris ajoutés hors connexion
+      local.forEach(id => { if (!remote.has(id)) { remote.add(id); this.push(id, true); } });
+      State.favorites = remote;
+      this.save();
+    } catch (e) {
+      console.warn('Favoris : table Supabase indisponible, favoris gardés sur cet appareil.', e);
+    }
+  },
+
+  toggle(id) {
+    const on = !State.favorites.has(id);
+    on ? State.favorites.add(id) : State.favorites.delete(id);
+    this.save();
+    if (this.remote) this.push(id, on);
+    return on;
+  },
+
+  async push(id, on) {
+    if (!State.user || !sb) return;
+    try {
+      const q = on
+        ? sb.from(FAVORITES_TABLE).upsert({ user_id: State.user.id, track_id: id }, { onConflict: 'user_id,track_id' })
+        : sb.from(FAVORITES_TABLE).delete().eq('user_id', State.user.id).eq('track_id', id);
+      const { error } = await q;
+      if (error) throw error;
+    } catch (e) { console.warn('Favori non synchronisé (gardé en local)', e); }
+  },
+};
+
+// ============================================================
+// NOUVEAUTÉS PAR EMAIL (Brevo) — consentement stocké dans les métadonnées du compte Supabase
+// ============================================================
+// news_optin : true / false (absent = pas encore demandé) · news_optin_at : date du choix · news_optin_source : où il a été fait
+const News = {
+  record(on, source) { return { news_optin: !!on, news_optin_at: new Date().toISOString(), news_optin_source: source }; },
+  get() {
+    const m = State.user && State.user.meta;
+    return m && typeof m.news_optin === 'boolean' ? m.news_optin : null;
+  },
+  async set(on, source) {
+    const rec = this.record(on, source);
+    const { data, error } = await sb.auth.updateUser({ data: rec });
+    if (error) throw error;
+    State.user.meta = (data && data.user && data.user.user_metadata) || { ...State.user.meta, ...rec };
+  },
+};
+
 let syncTimer = null;
 function setSync(txt) {
   const el = document.getElementById('p-sync');
@@ -727,6 +975,9 @@ function renderAuth() {
         <div class="field">
           <label for="auth-password">Choisis un mot de passe</label>
           <input type="password" id="auth-password" required minlength="6" autocomplete="new-password" placeholder="au moins 6 caractères">
+        </div>
+        <div class="pw-consent" style="margin-top:2px;">
+          <label><input type="checkbox" id="auth-news"> <span>Je souhaite recevoir par email les nouveautés AudioDEC (nouveaux épisodes, offres). Désinscription possible à tout moment.</span></label>
         </div>` : `
         <div class="field">
           <label for="auth-password">Mot de passe</label>
@@ -764,9 +1015,13 @@ function renderAuth() {
         renderAuth();
       } else if (State.authMode === 'signup') {
         if (pwd.length < 6) throw new Error('Password should be at least 6 characters');
+        const newsOptin = !!($('#auth-news') && $('#auth-news').checked);
         const { data, error } = await sb.auth.signUp({
           email, password: pwd,
-          options: { emailRedirectTo: location.origin + location.pathname },
+          options: {
+            emailRedirectTo: location.origin + location.pathname,
+            data: News.record(newsOptin, 'inscription AudioDEC'),   // preuve du consentement (choix + date + origine)
+          },
         });
         if (error) throw error;
         // Adresse déjà inscrite : Supabase renvoie un utilisateur sans identité
@@ -843,30 +1098,25 @@ function statusOf(t) {
   if ((p.position || 0) > 1) return 'wip';
   return 'new';
 }
-function allPodcasts() {
-  return [...new Set(State.tracks.map(t => t.podcast).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'fr'));
-}
+// Liste des hashtags (sans doublons, accents/majuscules ignorés), triés par ordre alphabétique
 function allKeywords() {
-  const count = new Map();
+  const seen = new Map();
   State.tracks.forEach(t => t.keywords.forEach(k => {
     const key = k.trim(); if (!key) return;
-    count.set(key, (count.get(key) || 0) + 1);
+    const n = norm(key); if (!seen.has(n)) seen.set(n, key);
   }));
-  return [...count.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'fr')).map(e => e[0]);
+  return [...seen.values()].sort((a, b) => a.localeCompare(b, 'fr', { sensitivity: 'base' }));
 }
 function filtered() {
   const terms = norm(State.query).split(/\s+/).filter(Boolean);
-  const kws = [...State.keywords].map(norm);
+  const tag = norm(State.tag);
   return State.tracks.filter(t => {
     if (terms.length && !terms.every(w => t._search.includes(w))) return false;
-    if (kws.length) {
-      const tk = t.keywords.map(norm);
-      if (!kws.every(k => tk.includes(k))) return false;
-    }
+    if (tag && !t.keywords.some(k => norm(k) === tag)) return false;
     if (State.domaine === 'free') { if (!t.free) return false; }
     else if (State.domaine !== 'all' && !String(t.domaine).includes(State.domaine)) return false;
-    if (State.podcast && t.podcast !== State.podcast) return false;
-    if (State.status !== 'all' && statusOf(t) !== State.status) return false;
+    if (State.status === 'fav') { if (!State.favorites.has(t.id)) return false; }
+    else if (State.status !== 'all' && statusOf(t) !== State.status) return false;
     return true;
   });
 }
@@ -909,6 +1159,7 @@ function renderLibrary() {
         <h1>BiblioDEC</h1>
       </div>
       <div id="quota" class="quota"></div>
+      <div id="news-ask"></div>
       <div id="resume-slot"></div>
       <label class="search">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
@@ -923,24 +1174,36 @@ function renderLibrary() {
           <button data-d="CAC" class="cac">CAC</button>
           <button data-d="free">Gratuits</button>
         </div>
-        ${allPodcasts().length ? `
+        ${allKeywords().length ? `
         <label class="pod">
-          <span class="visually-hidden">Podcast</span>
-          <select id="pod">
-            <option value="">Tous les podcasts</option>
-            ${allPodcasts().map(p => `<option value="${esc(p)}" ${State.podcast === p ? 'selected' : ''}>${esc(p)}</option>`).join('')}
+          <span class="visually-hidden">Hashtag</span>
+          <select id="tag">
+            <option value="">Tous les hashtags</option>
+            ${allKeywords().map(k => `<option value="${esc(k)}" ${norm(State.tag) === norm(k) ? 'selected' : ''}>#${esc(k)}</option>`).join('')}
           </select>
         </label>` : ''}
       </div>
-      <div class="chips" id="chips"></div>
       <div class="seg" id="seg">
-        <button data-s="all">Tous</button>
+        <button data-s="all">Tout</button>
         <button data-s="wip">En cours</button>
         <button data-s="new">Nouveaux</button>
         <button data-s="done">Écoutés</button>
+        <button data-s="fav">Ma liste</button>
       </div>
       <div class="count" id="count"></div>
       <ul id="list"></ul>
+      <div class="lib-foot">
+        <label class="news-toggle">
+          <input type="checkbox" id="news-toggle" ${News.get() ? 'checked' : ''}>
+          <span>Recevoir les nouveautés AudioDEC par email</span>
+        </label>
+        <div class="links">
+          <button type="button" id="foot-cgv">CGV</button>
+          <button type="button" id="foot-privacy">Politique de confidentialité</button>
+          <a href="mailto:contact@dec-ouverte.fr">Contact</a>
+        </div>
+        <div>© DEC-ouverte by VGB, 2026</div>
+      </div>
     </div>`;
 
   $('#logout').onclick = async () => { await saveNow(); await sb.auth.signOut(); };
@@ -955,23 +1218,64 @@ function renderLibrary() {
     const b = e.target.closest('button'); if (!b) return;
     State.domaine = b.dataset.d; renderList();
   });
-  const pod = $('#pod'); if (pod) pod.onchange = () => { State.podcast = pod.value; renderList(); };
-  $('#chips').addEventListener('click', e => {
-    const b = e.target.closest('.chip'); if (!b) return;
-    const k = b.dataset.k;
-    if (k === '__more') { State.showAllTags = !State.showAllTags; return renderList(); }
-    if (k === '__all') State.keywords.clear();
-    else State.keywords.has(k) ? State.keywords.delete(k) : State.keywords.add(k);
-    renderList();
-  });
+  const tagSel = $('#tag'); if (tagSel) tagSel.onchange = () => { State.tag = tagSel.value; renderList(); };
   $('#list').addEventListener('click', e => {
     const li = e.target.closest('.track'); if (!li) return;
     const id = li.dataset.id;
+    const fav = e.target.closest('[data-fav]');
+    if (fav) {
+      const on = Favs.toggle(id);
+      if (State.status === 'fav' && !on) return renderList();   // retiré de « Ma liste »
+      fav.classList.toggle('on', on);
+      fav.setAttribute('aria-pressed', on);
+      fav.setAttribute('aria-label', (on ? 'Retirer de ma liste : ' : 'Ajouter à ma liste : ') + trackById(id).title);
+      return;
+    }
     if (e.target.closest('[data-restart]')) { Progress.reset(id); if (State.currentId === id) audio.currentTime = 0; renderList(); return; }
     if (State.currentId === id) togglePlay(); else playTrack(id);
   });
+  $('#foot-cgv').onclick = () => showCGV();
+  $('#foot-privacy').onclick = () => showPrivacy();
+  const nt = $('#news-toggle');
+  nt.onchange = async () => {
+    const on = nt.checked;
+    nt.disabled = true;
+    try { await News.set(on, 'réglage AudioDEC'); toast(on ? 'C\'est noté : tu recevras les nouveautés par email.' : 'C\'est noté : tu ne recevras plus les nouveautés par email.'); }
+    catch (e) { console.warn(e); nt.checked = !on; toast('Impossible d\'enregistrer ton choix. Réessaie dans un instant.'); }
+    nt.disabled = false;
+    renderNewsAsk();
+  };
+  renderNewsAsk();
   renderList();
   renderQuota();
+}
+
+// Bandeau affiché une seule fois aux comptes qui n'ont jamais fait de choix (ex. comptes créés avant cette option)
+function renderNewsAsk() {
+  const el = document.getElementById('news-ask');
+  if (!el) return;
+  if (News.get() !== null) { el.innerHTML = ''; return; }
+  el.innerHTML = `
+    <div class="news-ask">
+      <p>Veux-tu recevoir par email les nouveautés AudioDEC (nouveaux épisodes, offres) ? Désinscription possible à tout moment.</p>
+      <div class="na-btns">
+        <button type="button" class="btn warm" data-news="1">Oui, volontiers</button>
+        <button type="button" class="btn secondary" data-news="0">Non merci</button>
+      </div>
+    </div>`;
+  el.querySelectorAll('[data-news]').forEach(b => b.onclick = async () => {
+    const on = b.dataset.news === '1';
+    el.querySelectorAll('button').forEach(x => x.disabled = true);
+    try {
+      await News.set(on, 'bandeau AudioDEC');
+      const nt = document.getElementById('news-toggle'); if (nt) nt.checked = on;
+      if (on) toast('Merci ! Tu recevras les nouveautés par email.');
+      renderNewsAsk();
+    } catch (e) {
+      console.warn(e); el.querySelectorAll('button').forEach(x => x.disabled = false);
+      toast('Impossible d\'enregistrer ton choix. Réessaie dans un instant.');
+    }
+  });
 }
 
 function renderList() {
@@ -994,15 +1298,6 @@ function renderList() {
     $('#resume').onclick = () => playTrack(t.id);
   } else slot.innerHTML = '';
 
-  // Mots-clés
-  const kws = allKeywords();
-  const MAX_TAGS = 12;
-  let shown = State.showAllTags ? kws : kws.slice(0, MAX_TAGS);
-  State.keywords.forEach(k => { if (!shown.includes(k)) shown = shown.concat(k); }); // un tag actif reste visible
-  $('#chips').innerHTML = kws.length ? `
-    <button class="chip ${State.keywords.size ? '' : 'on'}" data-k="__all">Tous</button>
-    ${shown.map(k => `<button class="chip ${State.keywords.has(k) ? 'on' : ''}" data-k="${esc(k)}">#${esc(k)}</button>`).join('')}
-    ${kws.length > MAX_TAGS ? `<button class="chip more" data-k="__more">${State.showAllTags ? 'Moins' : '+ ' + (kws.length - MAX_TAGS)}</button>` : ''}` : '';
   document.querySelectorAll('#dom button').forEach(b => b.classList.toggle('on', b.dataset.d === State.domaine));
 
   document.querySelectorAll('#seg button').forEach(b => b.classList.toggle('on', b.dataset.s === State.status));
@@ -1011,7 +1306,9 @@ function renderList() {
   $('#count').textContent = items.length === State.tracks.length ? `${items.length} titre${items.length > 1 ? 's' : ''}` : `${items.length} sur ${State.tracks.length}`;
 
   if (!items.length) {
-    $('#list').innerHTML = `<li class="empty"><h2>Aucun titre</h2>Essaie un autre mot-clé ou retire un filtre.</li>`;
+    $('#list').innerHTML = State.status === 'fav' && !State.favorites.size
+      ? `<li class="empty"><h2>Ta liste est vide</h2>Touche le cœur <span style="color:var(--ec)">♥</span> d'un titre pour l'ajouter ici.</li>`
+      : `<li class="empty"><h2>Aucun titre</h2>Essaie un autre mot-clé ou retire un filtre.</li>`;
     return;
   }
   const playing = !audio.paused;
@@ -1026,7 +1323,8 @@ function renderList() {
     const pct = st === 'done' ? 100 : (st === 'wip' && dur ? Math.min(100, p.position / dur * 100) : 0);
     const locked = isLocked(t);
     if (locked) status = '';
-    const badge = locked ? '<span class="t-badge lock">Abonnés</span>' : (t.free && !isSubscribed() ? '<span class="t-badge free">Gratuit</span>' : '');
+    const badge = locked ? `<span class="t-lock" title="Réservé aux abonnés"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON_LOCK}</svg></span>` : '';
+    const fav = State.favorites.has(t.id);
     return `
       <li class="track ${cur ? 'current' : ''} ${locked ? 'locked' : ''}" data-id="${esc(t.id)}">
         <button class="t-play" aria-label="${locked ? 'Réservé aux abonnés :' : cur && playing ? 'Pause' : 'Lire'} ${esc(t.title)}">
@@ -1043,6 +1341,10 @@ function renderList() {
           ${pct ? `<div class="bar ${st === 'done' ? 'done' : ''}"><i style="width:${pct.toFixed(1)}%"></i></div>` : ''}
           ${st !== 'new' && !locked ? `<button class="btn ghost" data-restart style="margin-top:6px;margin-left:-4px;font-size:10px;">↺ Recommencer</button>` : ''}
         </div>
+        <button type="button" class="t-fav ${fav ? 'on' : ''}" data-fav aria-pressed="${fav}"
+          aria-label="${fav ? 'Retirer de ma liste' : 'Ajouter à ma liste'} : ${esc(t.title)}">
+          <svg viewBox="0 0 24 24" aria-hidden="true">${ICON_HEART}</svg>
+        </button>
       </li>`;
   }).join('');
 }
@@ -1094,7 +1396,7 @@ async function playTrack(id, opts = {}) {
   showPlayer(true);
 
   const p = State.progress[id];
-  const startAt = opts.startAt != null ? opts.startAt : (p && !p.completed ? (p.position || 0) : 0);
+  const startAt = opts.startAt != null ? opts.startAt : (p ? (p.position || 0) : 0);
   retried = opts.isRetry ? retried : false;
   audio.src = src;
   audio.playbackRate = lsGet('speed', 1);
@@ -1129,13 +1431,13 @@ function saveNow(pushNow = true) {
   if (!id || !audio.src || !isFinite(audio.duration)) return Promise.resolve();
   const pos = audio.currentTime;
   const dur = audio.duration;
-  const completed = audio.ended || (dur - pos) <= DONE_MARGIN;
+  const nearEnd = audio.ended || (dur - pos) <= DONE_MARGIN;
   const prev = State.progress[id];
   Progress.set(id, {
-    position: completed ? 0 : pos,
+    position: nearEnd ? 0 : pos,
     duration: dur,
-    // une fois écouté, reste "écouté" sauf si on recommence manuellement
-    completed: completed || !!(prev && prev.completed && pos < 1),
+    // une fois écouté jusqu'au bout, reste « écouté » (même si on le réécoute) ; seul « Recommencer » le remet à zéro
+    completed: nearEnd || !!(prev && prev.completed),
   });
   lastSaveAt = Date.now();
   return pushNow ? Progress.push(id) : Promise.resolve();
@@ -1174,7 +1476,16 @@ audio.addEventListener('timeupdate', () => {
 audio.addEventListener('play', () => { setPlayIcon(); renderList(); });
 audio.addEventListener('pause', () => { if (!audio.error) wantPlay = false; setPlayIcon(); saveNow(); renderList(); });
 audio.addEventListener('seeked', () => saveNow());
-audio.addEventListener('ended', () => { saveNow(); setPlayIcon(); renderList(); });
+audio.addEventListener('ended', () => {
+  // Piste écoutée jusqu'au bout → « Écoutés », même si la durée n'est pas connue du navigateur
+  const id = State.currentId;
+  if (id) {
+    const d = isFinite(audio.duration) ? audio.duration : (State.progress[id] && State.progress[id].duration) || null;
+    Progress.set(id, { position: 0, duration: d, completed: true }, true);
+    lastSaveAt = Date.now();
+  }
+  setPlayIcon(); renderList();
+});
 // En cas d'erreur (ex. lien expiré pendant une longue pause) : on renouvelle les liens
 // et on reprend au même endroit, une seule fois ; ensuite on affiche l'erreur.
 let retried = false;
@@ -1252,10 +1563,10 @@ function render(v) {
 }
 
 async function onSignedIn(session) {
-  State.user = { id: session.user.id, email: session.user.email };
+  State.user = { id: session.user.id, email: session.user.email, meta: session.user.user_metadata || {} };
   render('splash');
   try {
-    await Promise.all([loadCatalog(), Progress.load(), loadStatus().catch(e => console.warn('Statut indisponible', e))]);
+    await Promise.all([loadCatalog(), Progress.load(), Favs.load(), loadStatus().catch(e => console.warn('Statut indisponible', e))]);
     await Urls.refresh().catch(e => console.warn('Liens audio indisponibles pour le moment', e));
   } catch (e) {
     console.error(e);
@@ -1279,7 +1590,7 @@ function onSignedOut() {
   showPlayer(false);
   Urls.clear();
   closePaywall();
-  Object.assign(State, { user: null, account: null, progress: {}, currentId: null, authMode: 'signin', authError: null, authInfo: null });
+  Object.assign(State, { user: null, account: null, progress: {}, favorites: new Set(), status: 'all', tag: '', currentId: null, authMode: 'signin', authError: null, authInfo: null });
   render('auth');
 }
 
