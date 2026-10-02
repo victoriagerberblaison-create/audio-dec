@@ -209,6 +209,26 @@ p { margin: 0 0 1em; }
 .t-fav.on svg { fill: currentColor; }
 .t-fav.on:active svg { transform: scale(.85); }
 .dom button[data-d="free"].on { background: var(--ok); }
+.t-btns { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 6px 0 0 -4px; }
+.t-btns .btn { font-size: 10px; }
+/* Colonne d'actions à droite d'un titre : favori + signalement */
+.t-actions { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; margin: 0 -8px 0 -6px; }
+.t-actions .t-fav { margin: 0; }
+.t-report { width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0; color: var(--ink-mute); border-radius: 50%; }
+.t-report:active { background: var(--rule-soft); }
+.t-report svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+/* Lien DEC-ouverte en tête de la BiblioDEC */
+.lib-top { display: flex; justify-content: flex-end; margin-bottom: 18px; }
+/* Fenêtre « Signaler un souci » */
+.report-preview { font-family: var(--font-mono); font-size: 11px; color: var(--ink-mute); background: var(--bg-deep);
+  border-radius: var(--radius-m); padding: 10px 14px; margin-bottom: 14px; line-height: 1.5; }
+.report-card textarea { width: 100%; min-height: 110px; resize: vertical; font: inherit; font-size: 16px; color: var(--ink);
+  background: var(--paper); border: 1px solid var(--rule); border-radius: var(--radius-m); padding: 12px 14px; }
+.report-card textarea:focus { border-color: var(--ink); outline: none; }
+.report-err { color: var(--ec); font-size: 12px; margin-top: 8px; }
+.report-btns { display: flex; gap: 10px; margin-top: 18px; }
+.report-btns .btn { flex: 1; }
 .track .t-kicker { font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-mute); margin-bottom: 3px; }
 .track .t-kicker .ec { color: var(--ec); }
 .track .t-kicker .cac { color: var(--cac); }
@@ -396,6 +416,7 @@ const PAYWALL = {
   paymentLink: 'https://buy.stripe.com/aFa6oA8rd5ld7Bl775a3u00',           // lien de paiement Stripe (https://buy.stripe.com/…). Vide = bouton « Bientôt disponible »
   portalLink: '',            // facultatif : lien du portail client Stripe (gérer / résilier l'abonnement)
 };
+const REPORTS_TABLE = 'audio_reports';       // table Supabase des signalements sur les pistes (même principe que card_reports des flashcards)
 const FAVORITES_TABLE = 'audio_favorites';   // table Supabase des favoris (« Ma liste »). Absente = favoris gardés sur l'appareil
 
 const LEGAL = {
@@ -457,6 +478,7 @@ function lsSet(k, v) { try { localStorage.setItem(LS + k, JSON.stringify(v)); } 
 
 const ICON_PLAY = '<path d="M7 4.5v15l13-7.5z"/>';
 const ICON_PAUSE = '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
+const ICON_REPORT = '<path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>';   // même icône que l'app flashcards
 const ICON_LOCK = '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>';
 const ICON_HEART = '<path d="M12 20.5s-7.5-4.6-9.2-9.4C1.6 7.7 3.8 4.5 7.2 4.5c2 0 3.6 1.1 4.8 2.8 1.2-1.7 2.8-2.8 4.8-2.8 3.4 0 5.6 3.2 4.4 6.6-1.7 4.8-9.2 9.4-9.2 9.4z"/>';
 
@@ -754,6 +776,7 @@ function closeCGV() {
 }
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
+  if (document.getElementById('report')) { closeReport(); return; }
   if (document.getElementById('cgv')) closeCGV(); else closePaywall();
 });
 
@@ -779,6 +802,74 @@ function toast(text) {
   t.className = 'toast'; t.textContent = text;
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 6000);
+}
+
+// ============================================================
+// SIGNALEMENT D'UNE PISTE — fenêtre + insertion Supabase (table `audio_reports`)
+// ============================================================
+function openReport(track) {
+  if (!track) return;
+  closeReport();
+  const box = document.createElement('div');
+  box.className = 'paywall';
+  box.id = 'report';
+  box.setAttribute('role', 'dialog');
+  box.setAttribute('aria-modal', 'true');
+  box.setAttribute('aria-labelledby', 'report-title');
+  box.innerHTML = `
+    <div class="pw-card report-card">
+      <div class="kicker">Signalement</div>
+      <h2 id="report-title" style="font-size:24px;">Un souci avec cette piste ? 🚨</h2>
+      <div class="report-preview">${esc(track.id)} — ${esc(track.title)}</div>
+      <div class="field">
+        <label for="report-obs">Ton observation</label>
+        <textarea id="report-obs" maxlength="1000" placeholder="Erreur, passage inaudible, info à corriger, coupure du son…"></textarea>
+      </div>
+      <div class="report-err" id="report-err" hidden></div>
+      <div class="report-btns">
+        <button type="button" class="btn secondary" id="report-cancel">Annuler</button>
+        <button type="button" class="btn warm" id="report-send">Envoyer</button>
+      </div>
+    </div>`;
+  document.body.appendChild(box);
+  document.body.classList.add('no-scroll');
+  box.addEventListener('click', e => { if (e.target === box) closeReport(); });
+  $('#report-cancel').onclick = closeReport;
+  $('#report-send').onclick = () => sendReport(track);
+  $('#report-obs').focus({ preventScroll: true });
+}
+function closeReport() {
+  const el = document.getElementById('report');
+  if (el) el.remove();
+  if (!document.getElementById('paywall') && !document.getElementById('cgv')) document.body.classList.remove('no-scroll');
+}
+async function sendReport(track) {
+  const obs = ($('#report-obs').value || '').trim();
+  const err = $('#report-err');
+  const btn = $('#report-send');
+  err.hidden = true;
+  if (!obs) { err.textContent = 'Décris rapidement le souci avant d\'envoyer.'; err.hidden = false; return; }
+  if (!sb || !State.user) { err.textContent = 'Connexion indisponible pour le moment. Réessaie plus tard.'; err.hidden = false; return; }
+  btn.disabled = true; btn.textContent = 'Envoi…';
+  // Position d'écoute au moment du signalement, si la piste est en cours de lecture (utile pour retrouver le passage)
+  const position = State.currentId === track.id && isFinite(audio.currentTime) ? Math.floor(audio.currentTime) : null;
+  try {
+    const { error } = await sb.from(REPORTS_TABLE).insert({
+      user_id: State.user.id,
+      pseudo: State.user.email || null,
+      track_id: String(track.id),
+      track_title: track.title || null,
+      position: position,
+      observation: obs
+    });
+    if (error) throw error;
+    closeReport();
+    toast('Merci, ton signalement a bien été envoyé.');
+  } catch (e) {
+    console.warn('[AudioDEC] signalement impossible :', e);
+    err.textContent = 'Envoi impossible pour le moment. Réessaie plus tard.'; err.hidden = false;
+    btn.disabled = false; btn.textContent = 'Envoyer';
+  }
 }
 
 function trackById(id) { return State.tracks.find(t => t.id === id); }
@@ -846,6 +937,13 @@ const Progress = {
       delete this._inflight[id];
       if (again) this.push(id);
     }
+  },
+
+  // Marquer « écouté » à la main (piste pas forcément terminée) → passe dans « Écoutés », reprendra au début
+  markDone(id) {
+    const t = trackById(id);
+    const prev = State.progress[id] || {};
+    this.set(id, { position: 0, duration: prev.duration || (t && t.duration) || null, completed: true }, true);
   },
 
   async reset(id) {
@@ -1154,6 +1252,9 @@ function renderLibrary() {
       <button class="btn ghost" id="logout">Quitter</button>
     </div>
     <div class="lib">
+      <div class="lib-top">
+        <a href="https://www.dec-ouverte.fr" target="_blank" rel="noopener" class="auth-logo-link">DEC-<em>ouverte</em></a>
+      </div>
       <div class="lib-head">
         <div class="kicker">DEC-ouverte · ${State.tracks.length} titre${State.tracks.length > 1 ? 's' : ''}</div>
         <h1>BiblioDEC</h1>
@@ -1222,6 +1323,7 @@ function renderLibrary() {
   $('#list').addEventListener('click', e => {
     const li = e.target.closest('.track'); if (!li) return;
     const id = li.dataset.id;
+    if (e.target.closest('[data-report]')) { openReport(trackById(id)); return; }
     const fav = e.target.closest('[data-fav]');
     if (fav) {
       const on = Favs.toggle(id);
@@ -1231,6 +1333,7 @@ function renderLibrary() {
       fav.setAttribute('aria-label', (on ? 'Retirer de ma liste : ' : 'Ajouter à ma liste : ') + trackById(id).title);
       return;
     }
+    if (e.target.closest('[data-done]')) { Progress.markDone(id); toast('Marqué comme écouté ✓'); renderList(); return; }
     if (e.target.closest('[data-restart]')) { Progress.reset(id); if (State.currentId === id) audio.currentTime = 0; renderList(); return; }
     if (State.currentId === id) togglePlay(); else playTrack(id);
   });
@@ -1339,12 +1442,21 @@ function renderList() {
             ${badge}<span class="t-status ${st}">${status}</span>
           </div>
           ${pct ? `<div class="bar ${st === 'done' ? 'done' : ''}"><i style="width:${pct.toFixed(1)}%"></i></div>` : ''}
-          ${st !== 'new' && !locked ? `<button class="btn ghost" data-restart style="margin-top:6px;margin-left:-4px;font-size:10px;">↺ Recommencer</button>` : ''}
+          ${!locked ? `<div class="t-btns">
+            ${st !== 'done' ? `<button class="btn ghost" data-done aria-label="Marquer comme écouté : ${esc(t.title)}">✓ Marquer écouté</button>` : ''}
+            ${st !== 'new' ? `<button class="btn ghost" data-restart>↺ Recommencer</button>` : ''}
+          </div>` : ''}
         </div>
-        <button type="button" class="t-fav ${fav ? 'on' : ''}" data-fav aria-pressed="${fav}"
-          aria-label="${fav ? 'Retirer de ma liste' : 'Ajouter à ma liste'} : ${esc(t.title)}">
-          <svg viewBox="0 0 24 24" aria-hidden="true">${ICON_HEART}</svg>
-        </button>
+        <div class="t-actions">
+          <button type="button" class="t-fav ${fav ? 'on' : ''}" data-fav aria-pressed="${fav}"
+            aria-label="${fav ? 'Retirer de ma liste' : 'Ajouter à ma liste'} : ${esc(t.title)}">
+            <svg viewBox="0 0 24 24" aria-hidden="true">${ICON_HEART}</svg>
+          </button>
+          <button type="button" class="t-report" data-report title="Signaler un souci"
+            aria-label="Signaler un souci : ${esc(t.title)}">
+            <svg viewBox="0 0 24 24" aria-hidden="true">${ICON_REPORT}</svg>
+          </button>
+        </div>
       </li>`;
   }).join('');
 }
