@@ -1218,7 +1218,27 @@ function filtered() {
     if (State.status === 'fav') { if (!State.favorites.has(t.id)) return false; }
     else if (State.status !== 'all' && statusOf(t) !== State.status) return false;
     return true;
-  });
+  }).sort(compareTracks);
+}
+// Ordre d'affichage :
+// 1) épisodes commencés (ou en cours de lecture) — le plus récemment écouté en haut
+// 2) épisodes jamais écoutés — gratuits d'abord, puis par date de création (ordre Supabase)
+// 3) épisodes terminés — tout en bas, gratuits et payants confondus
+function sortRank(t) {
+  const st = statusOf(t);
+  if (st === 'done') return 2;
+  if (st === 'wip' || t.id === State.currentId) return 0;
+  return 1;
+}
+function compareTracks(a, b) {
+  const ra = sortRank(a), rb = sortRank(b);
+  if (ra !== rb) return ra - rb;
+  if (ra === 0) {
+    const ua = a.id === State.currentId ? Infinity : new Date((State.progress[a.id] || {}).updated_at || 0).getTime();
+    const ub = b.id === State.currentId ? Infinity : new Date((State.progress[b.id] || {}).updated_at || 0).getTime();
+    if (ua !== ub) return ub - ua;
+  }
+  return State.tracks.indexOf(a) - State.tracks.indexOf(b);   // ordre de base (gratuit → created_at)
 }
 function highlight(text) {
   const terms = norm(State.query).split(/\s+/).filter(w => w.length > 1);
